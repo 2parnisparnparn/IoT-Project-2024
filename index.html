@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หน้าแรก</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif; /* ใช้ฟอนต์ Prompt */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #e0f7fa; /* สีพื้นหลัง */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row; /* จัดปุ่มแนวนอน */
+            justify-content: center;
+            align-items: center;
+            gap: 2vw; /* ระยะห่างระหว่างปุ่ม */
+            padding: 2vw;
+            max-width: 60vw; /* กำหนดขนาดสูงสุด */
+            width: 100%;
+        }
+
+        .button {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 35%; /* ขนาดปุ่ม */
+            height: 80vh; /* ความสูงปุ่ม */
+            background-color: white;
+            border-radius: 2vw; /* มุมโค้ง */
+            box-shadow: 0 0.4vw 0.8vw rgba(0, 0, 0, 0.1); /* เงา */
+            text-align: center;
+            font-size: 2vw; /* ขนาดฟอนต์ */
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            padding: 2vw;
+            text-decoration: none; /* ลบขีดเส้นใต้ลิงก์ */
+            color: inherit; /* ใช้สีของข้อความ */
+        }
+
+        .button img {
+            width: 20%; /* ขนาดรูปภาพ */
+            height: auto; /* ปรับขนาดรูปตามอัตราส่วน */
+            margin-bottom: 1vw; /* ระยะห่างด้านล่าง */
+        }
+
+        .button:hover {
+            transform: scale(1.05); /* ขยายปุ่มเมื่อ hover */
+            background-color: #f0f0f0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* จัดปุ่มแนวตั้งบนหน้าจอเล็ก */
+                align-items: center;
+                padding: 4vw; /* เพิ่มระยะห่างในหน้าจอเล็ก */
+            }
+
+            .button {
+                width: 80%; /* ขนาดปุ่มเล็กลง */
+                height: 50vh; /* ลดความสูงปุ่ม */
+                font-size: 4vw; /* ขนาดฟอนต์ใหญ่ขึ้น */
+                padding: 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="login.html" class="button">
+            <img src="https://via.placeholder.com/70" alt="Start Icon">
+            เริ่มต้น
+        </a>
+        <a href="howto.html" class="button">
+            <img src="https://via.placeholder.com/70" alt="วิธีการใช้งาน Icon">
+            วิธีการใช้งาน
+        </a>
+    </div>
+</body>
+</html>
