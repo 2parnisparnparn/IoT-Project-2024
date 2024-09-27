@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,8 +21,8 @@
 
         .container {
             display: flex;
-            max-height: 80vh; 
-            height: auto; 
+            max-height: 80vh;
+            height: auto;
             background-color: white;
             padding: 2vw;
             border-radius: 2vw;
@@ -38,7 +39,7 @@
             justify-content: center;
             align-items: center;
             border-radius: 2vw;
-            font-size: 2vw; 
+            font-size: 2vw;
             color: black;
             margin-right: 2vw;
         }
@@ -58,14 +59,14 @@
         .input-box {
             background-color: #48BF89;
             color: white;
-            font-size: 2vw; 
+            font-size: 2vw;
             padding: 1vw;
             text-align: center;
             border-radius: 2vw;
             margin-bottom: 1.5vw;
             width: 100%;
             box-sizing: border-box;
-            min-height: 4vw; 
+            min-height: 5vw;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -97,7 +98,8 @@
             background-color: #e0e0e0;
         }
 
-        .submit-btn, .back-btn {
+        .submit-btn,
+        .back-btn {
             text-align: center;
             padding: 1vw;
             border-radius: 2vw;
@@ -135,7 +137,8 @@
                 padding: 4vw;
             }
 
-            .image, .form-section {
+            .image,
+            .form-section {
                 width: 100%;
                 margin-right: 0;
                 margin-bottom: 4vw;
@@ -162,7 +165,8 @@
                 padding: 1.5vw;
             }
 
-            .submit-btn, .back-btn {
+            .submit-btn,
+            .back-btn {
                 font-size: 3.5vw;
                 padding: 1.5vw;
                 margin-top: 3vw;
@@ -170,6 +174,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="image">รูป</div>
@@ -198,7 +203,7 @@
     <script>
         function appendNumber(number) {
             const phoneNumberElement = document.getElementById('phone-number');
-            if (phoneNumberElement.textContent.length < 10) { 
+            if (phoneNumberElement.textContent.length < 10) {
                 phoneNumberElement.textContent += number;
             } else {
                 alert('คุณสามารถกรอกตัวเลขได้สูงสุด 10 หลักเท่านั้น'); // Alert if more than 10 digits
@@ -221,14 +226,15 @@
         function submitPhoneNumber() {
             const phoneNumberElement = document.getElementById('phone-number').textContent;
             if (phoneNumberElement.length === 10) {
-                alert('เบอร์โทรศัพท์ของคุณคือ ' + phoneNumberElement);
+                window.location.href = `main.html?phone-number=${phoneNumberElement}`;
             } else {
                 alert('กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก');
             }
         }
 
+
         // Listen to keyboard input
-        document.addEventListener('keydown', function(event) {
+        document.addEventListener('keydown', function (event) {
             const key = event.key;
             if (key >= '0' && key <= '9') {
                 appendNumber(key);
@@ -240,4 +246,5 @@
         });
     </script>
 </body>
+
 </html>
