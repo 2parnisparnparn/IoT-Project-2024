@@ -21,7 +21,6 @@
             padding: 20px;
             border-radius: 15px;
             width: 900px;
-         
         }
 
         .header {
@@ -169,7 +168,7 @@
     <div class="content">
         <!-- Left Section -->
         <div class="left-section">
-            <div class="phone">000-00000000</div>
+            <div class="phone" id="phoneDisplay">000-00000000</div>
             <div class="score" id="currentCreditDisplay">15.55 คะแนน</div>
             <div class="total">รวม: <span id="totalCreditDisplay">172</span></div>
 
@@ -192,37 +191,37 @@
                 <tr>
                     <td><strong>เบอร์โทร</strong></td>
                     <td></td>
-                    <td>000-00000000</td>
+                    <td id="phoneTableDisplay">000-00000000</td>
                 </tr>
                 <tr>
                     <td><strong>รายละเอียดขวด</strong></td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td id="petCountDisplayRow"><span id="petCountResult">5</span></td> <!-- Use the default value here -->
+                    <td id="petCountDisplayRow"><span id="petCountResult">5</span></td>
                     <td class="near-count">พลาสติกใส</td>
                     <td><span id="petCountResult"></span> × <span id="PET_CREDIT">0.1</span> = <span id="petCredit">5</span></td>
                 </tr>
                
                 <tr>
-                    <td id="canCountDisplayRow"><span id="canCountResult">5</span></td> <!-- Use the default value here -->
+                    <td id="canCountDisplayRow"><span id="canCountResult">5</span></td>
                     <td class="near-count">กระป๋อง</td>
                     <td><span id="canCountResult"></span> × <span id="CAN_CREDIT">1.5</span> = <span id="canCredit">7.5</span></td>
                 </tr>
                 <tr>
                     <td><strong>จำนวน</strong></td>
                     <td></td>
-                    <td id="itemCount"></td> <!-- Default value adjusted -->
+                    <td id="itemCount"></td>
                 </tr>
                 <tr>
                     <td><strong>คาร์บอนเครดิต</strong></td>
                     <td></td>
-                    <td id="currentCredit">0.00</td> <!-- Use a unique ID here -->
+                    <td id="currentCredit">0.00</td>
                 </tr>
                 <tr>
                     <td><strong>คาร์บอนเครดิตทั้งหมด</strong></td>
                     <td></td>
-                    <td id="totalCredit">0.00</td> <!-- Use a unique ID here -->
+                    <td id="totalCredit">0.00</td>
                 </tr>
             </table>
             
@@ -236,7 +235,7 @@
     </div>
     <div class="button-section">
         <button class="button back-button" onclick="goBack()">ย้อนกลับ</button>
-        <button class="button continue-button" onclick="continueToNext()">สะสมต่อ</button>
+        <button class="button continue-button" onclick="goBack()">สะสมต่อ</button>
     </div>
 </div>
 
@@ -245,27 +244,54 @@
     const PET_CREDIT = 0.1; // Carbon credit per PET bottle
     const CAN_CREDIT = 0.15; // Carbon credit per can
 
-    function calculateCredits() {
-        let petCount = parseInt(document.getElementById("petCountDisplay").innerText) || 5;
-        let canCount = parseInt(document.getElementById("canCountDisplay").innerText) || 5;
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const plasticCount = urlParams.get('plastic') || 0;
+    const canCount = urlParams.get('can') || 0;
+    const phoneNumber = urlParams.get('phone-number') || '000-00000000';
 
-        let petCredit = petCount * PET_CREDIT;
-        let canCredit = canCount * CAN_CREDIT;
+    // Display phone number
+    document.getElementById("phoneDisplay").innerText = phoneNumber;
+    document.getElementById("phoneTableDisplay").innerText = phoneNumber;
 
-        let totalCredit = petCredit + canCredit;
-        let totalItems = petCount  + canCount;
+    // Display plastic and can counts
+    document.getElementById("petCountDisplay").innerText = plasticCount;
+    document.getElementById("canCountDisplay").innerText = canCount;
 
-        // Update the displayed values
-        document.getElementById("petCredit").innerText = petCredit.toFixed(2);
-        document.getElementById("canCredit").innerText = canCredit.toFixed(2);
-        document.getElementById("totalCreditDisplay").innerText = totalCredit.toFixed(2);
-        document.getElementById("itemCount").innerText = totalItems + " ชิ้น";
-        document.getElementById("currentCredit").innerText = totalCredit.toFixed(2)+ " คะแนน"; // Update current credit
-        document.getElementById("totalCredit").innerText = (totalCredit * 10).toFixed(2)+ " คะแนน"; // Example for total credit calculation
+    // Update table values
+    document.getElementById("petCountResult").innerText = plasticCount;
+    document.getElementById("canCountResult").innerText = canCount;
+
+    // Calculate credit
+    const petCredit = plasticCount * PET_CREDIT;
+    const canCredit = canCount * CAN_CREDIT;
+
+    // Update carbon credits
+    document.getElementById("petCredit").innerText = petCredit.toFixed(2);
+    document.getElementById("canCredit").innerText = canCredit.toFixed(2);
+
+    // Calculate total credits
+    const totalCredits = (petCredit + canCredit).toFixed(2);
+    document.getElementById("currentCredit").innerText = totalCredits;
+    document.getElementById("currentCreditDisplay").innerText = totalCredits + ' คะแนน';
+    document.getElementById("totalCredit").innerText = totalCredits;
+    document.getElementById("totalCreditDisplay").innerText = totalCredits;
+    
+    // Calculate total items
+    const totalItemCount = parseInt(plasticCount) + parseInt(canCount);
+    document.getElementById("itemCount").innerText = totalItemCount;
+
+      // Go back function
+      function goBack() {
+        window.location.href = 'index.html'; // Redirects to index.html
     }
 
-    // Call the function to calculate credits on load
-    calculateCredits();
+    // Continue to next step function (Redirects to index.html)
+    function continueToNext() {
+        window.location.href = 'index.html'; // Redirects to index.html
+    }
+
+    
 </script>
 
 </body>
