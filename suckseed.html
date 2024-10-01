@@ -177,15 +177,18 @@
         .note {
             font-size: 12px;
             color: #AAAAAA; /* Light grey text */
-            margin-top: 40px;
             text-align: center;
         }
+
+        .left-section, .right-section {
+    flex-shrink: 0; /* ป้องกันไม่ให้ส่วนนี้ขยายหรือหดเกินขนาดที่กำหนด */
+}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">ดำเนินการเสร็จสิ้น</div>
+    <div class="header">ดำเนินการสำเร็จ</div>
 
     <div class="content">
         <!-- Left Section -->
@@ -211,7 +214,10 @@
         <div class="right-section">
             <table>
                 <tr>
-                    <td><strong>เบอร์โทร</strong></td>
+                    <td><strong>รายละเอียดการทำรายการ</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>เวลา</strong></td>
                     <td></td>
                     <td id="phoneTableDisplay">000-00000000</td>
                 </tr>
@@ -272,7 +278,7 @@
     const phoneNumber = urlParams.get('phone-number') || '000-00000000';
 
     // Display phone number
-    document.getElementById("phoneDisplay").innerText = phoneNumber;
+    document.getElementById("phoneDisplay").innerText = 'หมายเลขโทรศัพท์ ' + phoneNumber;
     document.getElementById("phoneTableDisplay").innerText = phoneNumber;
 
     // Display plastic and can counts
