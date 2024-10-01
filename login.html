@@ -271,7 +271,7 @@
         function submitPhoneNumber() {
             const phoneNumberElement = document.getElementById('phone-number').textContent;
             if (phoneNumberElement.length === 10) {
-                window.location.href = `main.html?phone-number=${phoneNumberElement}`;
+                window.location.href = `bottle-list.html?phone-number=${phoneNumberElement}`;
             } else {
                 showModal('กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก');
             }
