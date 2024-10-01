@@ -245,7 +245,9 @@
         </div>
     </div>
 
+    <script src="api.js"></script> <!-- Include the api.js file -->
     <script>
+        // Function to append number
         function appendNumber(number) {
             const phoneNumberElement = document.getElementById('phone-number');
             if (phoneNumberElement.textContent.length < 10) {
@@ -268,10 +270,24 @@
             window.history.back();
         }
 
-        function submitPhoneNumber() {
+        async function submitPhoneNumber() {
             const phoneNumberElement = document.getElementById('phone-number').textContent;
             if (phoneNumberElement.length === 10) {
-                window.location.href = `bottle-list.html?phone-number=${phoneNumberElement}`;
+                // เรียกฟังก์ชันจาก api.js เพื่อตรวจสอบผู้ใช้
+                try {
+                    const response = await checkUserExists(phoneNumberElement);
+                    if (response.ok) {
+                        // ถ้าพบผู้ใช้ จะเปลี่ยนไปที่หน้า bottle-list.html
+                        window.location.href = `bottle-list.html?phone-number=${phoneNumberElement}`;
+                    } else if (response.status === 404) {
+                        // ถ้าไม่พบผู้ใช้ แสดง modal ลงทะเบียน
+                        showModal('หมายเลขโทรศัพท์นี้ยังไม่ได้ลงทะเบียน กรุณาลงทะเบียน');
+                    } else {
+                        showModal('เกิดข้อผิดพลาดในการตรวจสอบหมายเลขโทรศัพท์');
+                    }
+                } catch (error) {
+                    showModal(error.message);
+                }
             } else {
                 showModal('กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก');
             }

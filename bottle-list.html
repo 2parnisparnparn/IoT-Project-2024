@@ -61,25 +61,49 @@
         table {
             width: 100%;
             font-size: 1.5vw;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 1vw;
+            border: 1px solid #424242; /* Dark border */
+            text-align: center;
         }
 
         .box-name {
             background-color: #019b61; /* Dark green background */
             color: white;
-            font-size: 1.5vw;
+
             padding: 1vw;
             border-radius: 10px;
         }
 
         .box-name-content {
             display: flex;
+            
             justify-content: space-between;
             align-items: center;
         }
 
         .box-name img {
-            width: 28%;
+            width: 15%;
             height: auto;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1vw;
+            background-color: #2b2b2b; /* Slightly lighter background for item rows */
+            border-radius: 10px;
+            margin: 0.5vw 0;
+        }
+
+        .item img {
+            width: 10%; /* Adjust size of the images */
+            height: auto;
+            margin-right: 1vw;
         }
 
         .right-box {
@@ -125,6 +149,14 @@
                 font-size: 4vw;
                 padding: 1.5vw;
             }
+
+            td {
+                font-size: 3vw; /* Increase font size for smaller screens */
+            }
+
+            .item img {
+                width: 30%; /* Adjust image size for smaller screens */
+            }
         }
     </style>
 </head>
@@ -134,24 +166,24 @@
         <div class="column">
             <div class="box-name">
                 <div class="box-name-content">
-                    <div>สวัสดีคุณ <b id="phone-number"></b> <br> คุณมีเครดิตรวม: <b>150 คะแนน</b></div>
+                    <div>เบอร์โทร <b id="phone-number"></b> <br> เครดิตรวม: <b>150 คะแนน</b></div>
                     <img src="https://cdn-icons-png.flaticon.com/128/12487/12487015.png" alt="sawasdee">
                 </div>
             </div>
             <div class="box">
                 <div class="header">รายการขวด</div>
-                <table>
-                    <tr>
-                        <td>พลาสติก</td>
-                        <td id="plastic-qty">10</td>
-                    </tr>
-                    <tr>
-                        <td>กระป๋อง</td>
-                        <td id="can-qty">5</td>
-                    </tr>
-                </table>
+                <div class="item">
+                    <img src="image/pet.png" alt="plastic bottle">
+                    <div>พลาสติก</div>
+                    <div id="plastic-qty">10</div>
+                </div>
+                <div class="item">
+                    <img src="image/can.png" alt="can">
+                    <div>กระป๋อง</div>
+                    <div id="can-qty">5</div>
+                </div>
             </div>
-            <button class="submit-btn" onclick="sentData()">เสร็จสิ้นแล้ว</button>
+            <button class="submit-btn" onclick="sentData()">เสร็จสิ้น</button>
         </div>
 
         <div class="column">
