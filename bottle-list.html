@@ -11,129 +11,135 @@
     <style>
         body {
             font-family: 'Prompt', sans-serif;
+            background-color: #121212; /* Dark background color */
+            color: #f0f0f0; /* Light text color */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #121212; /* Dark background color */
-            color: #f0f0f0; /* Light text color */
         }
 
         .container {
             display: flex;
-            flex-direction: row;
-            justify-content: center;
-            gap: 2vw;
+            max-height: 80vh;
+            height: 80%;
+            background-color: #1f1f1f; /* Dark container background */
             padding: 2vw;
+            border-radius: 10px;
+            box-shadow: 0 0.4vw 0.8vw rgba(0, 0, 0, 0.5); /* Dark shadow */
             max-width: 60vw;
             width: 100%;
+            overflow: auto;
+            gap: 2vw;
+            position: relative;
         }
 
         .column {
             display: flex;
             flex-direction: column;
-            gap: 20px;
             width: 100%;
         }
 
         .box {
             background-color: #1f1f1f;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
-            color: #f0f0f0;
+            border-radius: 10px;
+            padding: 2vw;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 50vh;
+            color: #f0f0f0;
+            flex-grow: 1; /* Allow box to grow and take available space */
         }
 
         .header {
-            font-size: 3vw;
+            font-size: 1.8vw;
             font-weight: bold;
-            margin-bottom: 3vh;
             color: #66bb6a; /* Highlighted header text */
             text-align: center;
-            text-shadow: 
-                         0 0 10px rgba(145, 209, 149, 0.6), /* Outer glow */
-                         0 0 15px rgba(145, 209, 149, 0.4); /* Slightly bigger, softer glow */
+            margin-bottom: 2vw;
         }
 
         table {
             width: 100%;
-            color: #f0f0f0;
-            font-size: 1.4vw;
-        }
-
-        .header-table {
             font-size: 1.5vw;
-            font-weight: bold;
-            text-align: right;
-            margin-right: 10%;
-            margin-bottom: 2%;
-        }
-
-        table td {
-            padding: 1vw 0;
-        }
-
-        .right-box {
-            height: 30vh;
-            text-align: center;
-            font-size: 1.8vw;
-            font-weight: bold;
-        }
-
-        .right-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.8);
         }
 
         .box-name {
-            background-color: #ffffff;
-            color: #121212;
-            font-size: 1.2vw;
+            background-color: #019b61; /* Dark green background */
+            color: white;
+            font-size: 1.5vw;
             padding: 1vw;
-            border-radius: 2vw;
+            border-radius: 10px;
         }
-        
+
         .box-name-content {
             display: flex;
-            justify-content: space-between; /* จัดให้ข้อความและรูปอยู่คนละฝั่ง */
-            align-items: center; /* จัดให้แนวตั้งอยู่ตรงกลาง */
+            justify-content: space-between;
+            align-items: center;
         }
 
         .box-name img {
             width: 28%;
             height: auto;
-            margin-left: 60%;
         }
-        
+
+        .right-box {
+            text-align: center;
+            font-size: 1.8vw;
+            padding: 1vw;
+            background-color: #424242; /* Dark background for box */
+            border-radius: 10px;
+            color: #f0f0f0;
+            height: 100%;
+        }
+
         .submit-btn {
-            font-family: 'Prompt', sans-serif;
+            background-color: #0b9d65;
+            color: white;
             text-align: center;
             font-size: 1.5vw;
             padding: 1vw;
-            border-radius: 2vw;
+            border-radius: 10px;
             border: none;
-        }
-
-        .submit-btn {
-            background-color: #388E3C;
-            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: auto; /* Push the button to the bottom */
+            font-family: 'Prompt', sans-serif;
         }
 
         .submit-btn:hover {
-            background-color: #4caf50;
+            background-color: #58d0a2;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+                padding: 4vw;
+            }
+
+            .box-name {
+                font-size: 4vw;
+            }
+
+            .submit-btn {
+                font-size: 4vw;
+                padding: 1.5vw;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">           
+    <div class="container">
         <div class="column">
+            <div class="box-name">
+                <div class="box-name-content">
+                    <div>สวัสดีคุณ <b id="phone-number"></b> <br> คุณมีเครดิตรวม: <b>150 คะแนน</b></div>
+                    <img src="https://cdn-icons-png.flaticon.com/128/12487/12487015.png" alt="sawasdee">
+                </div>
+            </div>
             <div class="box">
-                <div class="header"><u> รายการขวด </u> </div>
-                <div class="header-table">จำนวน</div>
+                <div class="header">รายการขวด</div>
                 <table>
                     <tr>
                         <td>พลาสติก</td>
@@ -145,36 +151,22 @@
                     </tr>
                 </table>
             </div>
+            <button class="submit-btn" onclick="sentData()">เสร็จสิ้นแล้ว</button>
         </div>
 
         <div class="column">
-            <div class="box-name">
-                <div class="box-name-content">
-                    <div>
-                        สวัสดีคุณ <b id="phone-number"> </b> <br>
-                        คุณมีเครดิต: <b> 150 คะแนน </b> แล้วนะ
-                    </div>
-                    <div>
-                        <img src="https://cdn-icons-png.flaticon.com/128/12487/12487015.png" alt="sawasdee">
-                    </div>
-                </div>
+            <div class="right-box">
+                <img src="https://cdn-icons-png.flaticon.com/128/10040/10040507.png" alt="instructions"> <br>
+                กรุณาใส่ขวด
             </div>
-        
-            <div class="box right-box">
-                <img src="https://cdn-icons-png.flaticon.com/128/10040/10040507.png" alt="วิธีการใช้งาน Icon"> <br>
-                วิธีการแลกเครดิต
-            </div>
-            <button class="submit-btn" onclick="sentData()">เสร็จสิ้นแล้ว</button>
         </div>
     </div>
 
     <script>
         function sentData() {
-            window.location.href = "suckseed.html";
             const plasticQty = document.getElementById('plastic-qty').textContent;
             const canQty = document.getElementById('can-qty').textContent;
             const phoneNumber = document.getElementById('phone-number').textContent.trim();
-
             const url = `suckseed.html?plastic=${plasticQty}&can=${canQty}&phone-number=${phoneNumber}`;
             window.location.href = url;
         }

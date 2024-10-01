@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คะแนนสะสม</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1F1F1F; /* Dark theme */
+            font-family: 'Prompt', sans-serif;
+            background-color: #121212;
             margin: 0;
             padding: 0;
             display: flex;
@@ -17,10 +18,16 @@
         }
 
         .container {
-            background-color: #2C2C2C; /* Darker container */
-            padding: 20px;
-            border-radius: 15px;
-            width: 900px;
+            max-height: 80vh;
+            height: 80%;
+            background-color: #1f1f1f; /* Dark container background */
+            padding: 2vw;
+            border-radius: 10px;
+            box-shadow: 0 0.4vw 0.8vw rgba(0, 0, 0, 0.5); /* Dark shadow */
+            max-width: 60vw;
+            width: 100%;
+            overflow: auto;
+            gap: 2vw;
         }
 
         .header {
@@ -140,6 +147,7 @@
             border-radius: 10px;
             border: none;
             cursor: pointer;
+            font-family: 'Prompt', sans-serif;
         }
 
         .back-button {
@@ -148,7 +156,7 @@
         }
 
         .continue-button {
-            background-color: #2D8C3C;
+            background-color: #019b61;
             color: white;
         }
 
@@ -163,7 +171,7 @@
 <body>
 
 <div class="container">
-    <div class="header">รายละเอียด</div>
+    <div class="header">ดำเนินการเสร็จสิ้น</div>
 
     <div class="content">
         <!-- Left Section -->
@@ -234,8 +242,7 @@
         </div>
     </div>
     <div class="button-section">
-        <button class="button back-button" onclick="goBack()">ย้อนกลับ</button>
-        <button class="button continue-button" onclick="goBack()">สะสมต่อ</button>
+        <button class="button continue-button" onclick="goBack()">ตกลง</button>
     </div>
 </div>
 
