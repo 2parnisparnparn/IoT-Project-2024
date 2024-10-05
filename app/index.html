@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
+      position: relative;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #019b61;
+      font-weight: 700;
+      font-size: 28px;
+    }
+    .form-group {
+      margin-bottom: 25px;
+      opacity: 1;
+      animation: fadeIn 0.5s forwards;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #666;
+      font-weight: 500;
+    }
+    input[type="tel"], input[type="password"] {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background-color: #f5f5f5;
+      color: #333;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #019b61;
+    }
+    input::placeholder {
+      color: #999;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background-color: #019b61;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-bottom: 15px;
+    }
+    button:hover {
+      background-color: #017d4e;
+    }
+    button#backButton {
+      background-color: #f0f0f0;
+      color: #333;
+    }
+    button#backButton:hover {
+      background-color: #e0e0e0;
+    }
+    .error {
+      color: #ff4c4c;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .signup-link {
+      margin-top: 25px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .signup-link a {
+      color: #019b61;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .signup-link a:hover {
+      text-decoration: underline;
+    }
+    @keyframes slideLeft {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideRight {
+      from { transform: translateX(-100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutLeft {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(-100%); opacity: 0; }
+    }
+    @keyframes slideOutRight {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        border-radius: 0;
+        box-shadow: none;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      body {
+        background-color: #ffffff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>เข้าสู่ระบบ</h2>
+    <form id="loginForm">
+      <div class="form-group" id="phoneGroup">
+        <label for="phone">หมายเลขโทรศัพท์</label>
+        <input type="tel" id="phone" name="phone" placeholder="กรอกหมายเลขโทรศัพท์" required>
+        <p class="error" id="errorPhone"></p>
+      </div>
+      <div class="form-group" id="passwordGroup" style="display: none;">
+        <label for="password">รหัสผ่าน</label>
+        <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่าน" required>
+        <p class="error" id="errorPassword"></p>
+        <button type="button" id="backButton">ย้อนกลับ</button>
+      </div>
+      <button type="button" id="nextButton">ถัดไป</button>
+      <button type="submit" id="loginButton" style="display: none;">เข้าสู่ระบบ</button>
+    </form>
+    <div class="signup-link">
+      <p>ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิก</a></p>
+    </div>
+  </div>
+
+  <script>
+    const nextButton = document.getElementById('nextButton');
+    const backButton = document.getElementById('backButton');
+    const loginButton = document.getElementById('loginButton');
+    const phoneGroup = document.getElementById('phoneGroup');
+    const passwordGroup = document.getElementById('passwordGroup');
+    const errorPhone = document.getElementById('errorPhone');
+    const errorPassword = document.getElementById('errorPassword');
+    const phoneInput = document.getElementById('phone');
+    const passwordInput = document.getElementById('password');
+
+    nextButton.addEventListener('click', function() {
+      const phone = phoneInput.value;
+      if (phone.length === 10) {
+        phoneGroup.style.animation = 'slideOutLeft 0.5s forwards';
+        nextButton.style.animation = 'slideOutLeft 0.5s forwards';
+        
+        setTimeout(() => {
+          phoneGroup.style.display = 'none';
+          nextButton.style.display = 'none';
+          passwordGroup.style.display = 'block';
+          passwordGroup.style.animation = 'slideRight 0.5s forwards';
+          loginButton.style.display = 'block';
+          loginButton.style.animation = 'slideRight 0.5s forwards';
+        }, 500);
+        errorPhone.textContent = "";
+      } else {
+        errorPhone.textContent = "กรุณากรอกหมายเลขโทรศัพท์ให้ครบ 10 หลัก";
+      }
+    });
+
+    backButton.addEventListener('click', function() {
+      passwordGroup.style.animation = 'slideOutRight 0.5s forwards';
+      loginButton.style.animation = 'slideOutRight 0.5s forwards';
+
+      setTimeout(() => {
+        passwordGroup.style.display = 'none';
+        loginButton.style.display = 'none';
+        phoneGroup.style.display = 'block';
+        phoneGroup.style.animation = 'slideLeft 0.5s forwards';
+        nextButton.style.display = 'block';
+        nextButton.style.animation = 'slideLeft 0.5s forwards';
+      }, 500);
+    });
+
+    const form = document.getElementById('loginForm');
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const password = passwordInput.value;
+      if (password.length >= 6) {
+        errorPassword.textContent = "";
+        alert('เข้าสู่ระบบสำเร็จ!');
+      } else {
+        errorPassword.textContent = "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+      }
+    });
+  </script>
+</body>
+</html>

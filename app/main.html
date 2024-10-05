@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ข้อมูลผู้ใช้</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .header-button {
+      background-color: transparent;
+      border: none;
+      color: #019b61;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .header-button:hover {
+      background-color: rgba(1, 155, 97, 0.1);
+    }
+    .logout-button {
+      color: #ff4c4c;
+    }
+    .logout-button:hover {
+      background-color: rgba(255, 76, 76, 0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #019b61;
+      font-weight: 700;
+      font-size: 28px;
+    }
+    .profile-info {
+      margin-bottom: 30px;
+    }
+    .info-item {
+      margin-bottom: 20px;
+    }
+    .info-label {
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .info-value {
+      font-size: 18px;
+      color: #333;
+    }
+    .points {
+      text-align: center;
+      margin-bottom: 30px;
+      background-color: #f8f8f8;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .points-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: #019b61;
+    }
+    .points-label {
+      font-size: 16px;
+      color: #666;
+    }
+    .redeem-button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background-color: #019b61;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .redeem-button:hover {
+      background-color: #017d4e;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        border-radius: 0;
+        box-shadow: none;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      body {
+        background-color: #ffffff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <button class="header-button edit-button">แก้ไข</button>
+      <button class="header-button logout-button">ออกจากระบบ</button>
+    </div>
+    <h2>ข้อมูลผู้ใช้</h2>
+    <div class="profile-info">
+      <div class="info-item">
+        <div class="info-label">ชื่อ</div>
+        <div class="info-value">สมชาย ใจดี</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">เบอร์โทร</div>
+        <div class="info-value">0812345678</div>
+      </div>
+    </div>
+    <div class="points">
+      <div class="points-value">1,500</div>
+      <div class="points-label">คะแนนสะสม</div>
+    </div>
+    <button class="redeem-button">แลกคะแนน</button>
+  </div>
+
+  <script>
+    document.querySelector('.edit-button').addEventListener('click', function() {
+      alert('เปิดหน้าแก้ไขข้อมูล');
+    });
+
+    document.querySelector('.logout-button').addEventListener('click', function() {
+      alert('ออกจากระบบ');
+    });
+
+    document.querySelector('.redeem-button').addEventListener('click', function() {
+      alert('เปิดหน้าแลกคะแนน');
+    });
+  </script>
+</body>
+</html>
