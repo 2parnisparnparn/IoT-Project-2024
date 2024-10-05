@@ -1,1 +1,4 @@
 **/.DS_Store
+
+# Ignore config.json file
+config.json

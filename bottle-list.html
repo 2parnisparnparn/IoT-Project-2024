@@ -5,8 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายการขวด</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>
 
     <style>
         body {
@@ -118,8 +120,7 @@
             flex-direction: column; /* ให้บล็อกเป็นแนวตั้ง */
             justify-content: center; /* จัดแนวกลางในแนวตั้ง */
             align-items: center; /* จัดให้กลางแนวนอน */
-}
-
+        }
 
         /* Add keyframe animation for the bottle */
         @keyframes bounce {
@@ -193,12 +194,12 @@
                 <div class="item">
                     <img src="image/pet.png" alt="plastic bottle">
                     <div>พลาสติก</div>
-                    <div id="plastic-qty">10</div>
+                    <div id="plastic-qty">0</div>
                 </div>
                 <div class="item">
                     <img src="image/can.png" alt="can">
                     <div>กระป๋อง</div>
-                    <div id="can-qty">5</div>
+                    <div id="can-qty">0</div>
                 </div>
             </div>
             <button class="submit-btn" onclick="sentData()">เสร็จสิ้น</button>
@@ -223,11 +224,114 @@
             </div>
                 <div>กรุณาใส่ขวด</div>
             </div>
-            
         </div>
     </div>
 
+    <video id="video" autoplay muted playsinline></video>
+
     <script>
+        let model;
+        const video = document.getElementById('video');
+        const collectedPredictions = [];
+        const maxPredictions = 10;
+
+        // โหลดข้อมูลจาก config.json
+        fetch('config.json')
+            .then(response => response.json())
+            .then(config => {
+                const apiKey = config.roboflow_key;
+                const modelName = config.model;
+                const modelVersion = config.version;
+
+                // เรียกใช้กล้องและโหลดโมเดล Roboflow
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                    .then(stream => {
+                        video.srcObject = stream;
+                        return video.play();
+                    })
+                    .then(() => roboflow.auth({ publishable_key: apiKey })
+                        .load({ model: modelName, version: modelVersion }))
+                    .then(m => {
+                        model = m;
+                        detectFrame();
+                    });
+            })
+            .catch(error => console.error('Error loading config:', error));
+
+        // ฟังก์ชันตรวจจับวัตถุในเฟรม
+        function detectFrame() {
+            model.detect(video).then(predictions => {
+                const filteredPredictions = predictions.filter(prediction => prediction.confidence >= 0.5);
+
+                // เก็บผลลัพธ์การตรวจจับ
+                filteredPredictions.forEach(prediction => {
+                    if (collectedPredictions.length < maxPredictions) {
+                        collectedPredictions.push(prediction.class);
+                    }
+                });
+
+                // เมื่อเก็บครบ 10 ครั้ง หยุดกล้องและประมวลผลผลลัพธ์
+                if (collectedPredictions.length >= maxPredictions) {
+                    stopVideoStream();
+                    processResults();
+                }
+        
+                requestAnimationFrame(detectFrame);
+            });
+        }
+
+        // หยุดกล้อง
+        function stopVideoStream() {
+            const stream = video.srcObject;
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+        }
+
+        // ประมวลผลผลลัพธ์การตรวจจับ
+        function processResults() {
+            if (collectedPredictions.length === 0) {
+                console.log("No object detected.");
+                return;
+            }
+        
+            const counts = collectedPredictions.reduce((acc, className) => {
+                acc[className] = (acc[className] || 0) + 1;
+                return acc;
+            }, {});
+        
+            const maxClass = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+            const maxCount = counts[maxClass];
+        
+            updateResult(maxClass, maxCount);
+        
+            // ล้างข้อมูลที่เก็บไว้
+            collectedPredictions.length = 0;
+        }
+
+        // อัปเดตผลลัพธ์บน UI
+        function updateResult(maxClass, maxCount) {
+            if (maxClass === 'plastic') {
+                let currentPlasticQty = parseInt(document.getElementById('plastic-qty').textContent, 10);
+                document.getElementById('plastic-qty').textContent = currentPlasticQty + 1;
+            } else if (maxClass === 'can') {
+                let currentCanQty = parseInt(document.getElementById('can-qty').textContent, 10);
+                document.getElementById('can-qty').textContent = currentCanQty + 1;
+            }
+            startVideoStream();
+        }
+
+        // เริ่มกล้องอีกครั้ง
+        function startVideoStream() {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(stream => {
+                    video.srcObject = stream;
+                    return video.play();
+                })
+                .then(() => {
+                    detectFrame();
+                });
+        }
+
         function sentData() {
             const plasticQty = document.getElementById('plastic-qty').textContent;
             const canQty = document.getElementById('can-qty').textContent;
@@ -235,20 +339,6 @@
             const url = `suckseed.html?plastic=${plasticQty}&can=${canQty}&phone-number=${phoneNumber}`;
             window.location.href = url;
         }
-
-        function getPhoneNumber() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('phone-number');
-        }
-
-        function updateUserName() {
-            const phoneNumber = getPhoneNumber();
-            if (phoneNumber) {
-                document.getElementById('phone-number').textContent = phoneNumber;
-            }
-        }
-
-        window.onload = updateUserName;
     </script>
 </body>
 
