@@ -35,7 +35,7 @@
       margin-bottom: 20px;
     }
     .promotion-info {
-      margin-bottom: 30px;
+      margin-bottom: 10px;
     }
     .promotion-label {
       font-size: 18px;
@@ -47,6 +47,12 @@
       font-weight: 700;
       color: #333;
       margin-top: 5px;
+    }
+    .loading {
+      display: none; /* ซ่อนข้อความเมื่อเริ่มต้น */
+      font-size: 18px;
+      color: #019b61;
+      margin-bottom: 10px;
     }
     .buttons {
       display: flex;
@@ -86,6 +92,7 @@
         <div class="promotion-value" id="promo-description"></div>
         <div class="promotion-value" id="promo-points"></div>
     </div>
+    <div class="loading" id="loading">กำลังทำการแลกคะแนน...</div> <!-- แสดงข้อความเมื่อทำการแลกคะแนน -->
     <div class="buttons">
       <button class="button back" onclick="goBack()">ย้อนกลับ</button>
       <button class="button confirm" onclick="confirmPromotion()">ตกลง</button>
@@ -93,41 +100,36 @@
   </div>
 
   <script>
-    function goBack() {
+    async function goBack() {
       window.history.back(); // กลับไปหน้าก่อนหน้านี้
     }
 
-    function confirmPromotion() {
+    async function confirmPromotion() {
       const points = parseInt(getQueryParam('points'), 10);
       const promoCode = getQueryParam('code');
       const description = decodeURIComponent(getQueryParam('description'));
       const phoneNumber = decodeURIComponent(getQueryParam('phone_number'));
       const currentCredit = parseInt(decodeURIComponent(getQueryParam('credit')), 10);
+      const loading = document.getElementById('loading'); // อ้างอิงถึงข้อความ loading
 
       // ตรวจสอบความถูกต้องของข้อมูล
       if (!phoneNumber || isNaN(currentCredit)) {
-        errorMessage.textContent = 'ข้อมูลผู้ใช้ไม่ถูกต้อง';
-        errorMessage.style.display = 'block';
-        loading.style.display = 'none';
-        confirmButton.disabled = false;
-        confirmButton.textContent = 'ตกลง';
+        alert('ข้อมูลผู้ใช้ไม่ถูกต้อง');
         return;
       }
 
       // คำนวณคะแนนใหม่
       const newCredit = currentCredit - points;
       if (newCredit < 0) {
-        errorMessage.textContent = 'คะแนนของคุณไม่เพียงพอ';
-        errorMessage.style.display = 'block';
-        loading.style.display = 'none';
-        confirmButton.disabled = false;
-        confirmButton.textContent = 'ตกลง';
+        alert('คะแนนของคุณไม่เพียงพอ');
         return;
       }
 
+      loading.style.display = 'block'; // แสดงข้อความกำลังทำการแลกคะแนน
+
       try {
         // เรียก API เพื่ออัปเดตคะแนน
-        const response = await fetch(`http://localhost:3000/update/${encodeURIComponent(phoneNumber)}/credit`, {
+        const response = await fetch(`http://localhost:3000/api/update/${encodeURIComponent(phoneNumber)}/credit`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -136,24 +138,20 @@
         });
 
         if (response.ok) {
-          const updatedUser = await response.json();
-          // เปลี่ยนหน้าไปยังหน้า confirmation.html พร้อมข้อมูลที่อัปเดต
-          window.location.href = "thank.html";
-        } else if (response.status === 404) {
-          errorMessage.textContent = 'ไม่พบผู้ใช้';
-          errorMessage.style.display = 'block';
-        } else if (response.status === 400) {
-          errorMessage.textContent = 'ค่าคะแนนไม่ถูกต้อง';
-          errorMessage.style.display = 'block';
+          // ใช้ setTimeout เพื่อหน่วงเวลา 3 วินาทีก่อนเปลี่ยนหน้า
+          setTimeout(() => {
+            loading.style.display = 'none'; // ซ่อนข้อความ loading
+            window.location.href = "thank.html";
+          }, 1000);
         } else {
+          loading.style.display = 'none'; // ซ่อนข้อความ loading
           const errorData = await response.text();
-          errorMessage.textContent = `ข้อผิดพลาด: ${errorData}`;
-          errorMessage.style.display = 'block';
+          alert(`ข้อผิดพลาด: ${errorData}`);
         }
       } catch (error) {
+        loading.style.display = 'none'; // ซ่อนข้อความ loading
         console.error('Error updating credit:', error);
-        errorMessage.textContent = 'เกิดข้อผิดพลาดในการอัปเดตเครดิต';
-        errorMessage.style.display = 'block';
+        alert('เกิดข้อผิดพลาดในการอัปเดตเครดิต');
       }
     }
 
@@ -167,9 +165,6 @@
       const points = getQueryParam('points');
       const promoCode = getQueryParam('code');
       const description = decodeURIComponent(getQueryParam('description'));
-
-      // ดึงข้อมูลที่อัปเดตจาก API
-      const currentCredit = points;
 
       // แสดงผลในหน้ายืนยัน
       document.getElementById('promo-description').textContent = description;
