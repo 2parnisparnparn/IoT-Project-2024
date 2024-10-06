@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
       box-sizing: border-box;
       font-family: 'Prompt', sans-serif;
     }
+
     body {
       background-color: #f0f0f0;
       display: flex;
@@ -20,6 +22,7 @@
       min-height: 100vh;
       color: #333;
     }
+
     .container {
       background-color: #ffffff;
       padding: 30px;
@@ -29,12 +32,14 @@
       max-width: 400px;
       position: relative;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
+
     .header-button {
       background-color: transparent;
       border: none;
@@ -45,15 +50,19 @@
       border-radius: 5px;
       transition: background-color 0.3s ease;
     }
+
     .header-button:hover {
       background-color: rgba(1, 155, 97, 0.1);
     }
+
     .logout-button {
       color: #ff4c4c;
     }
+
     .logout-button:hover {
       background-color: rgba(255, 76, 76, 0.1);
     }
+
     h2 {
       text-align: center;
       margin-bottom: 30px;
@@ -61,21 +70,26 @@
       font-weight: 700;
       font-size: 28px;
     }
+
     .profile-info {
       margin-bottom: 30px;
     }
+
     .info-item {
       margin-bottom: 20px;
     }
+
     .info-label {
       font-weight: 500;
       color: #666;
       margin-bottom: 5px;
     }
+
     .info-value {
       font-size: 18px;
       color: #333;
     }
+
     .points {
       text-align: center;
       margin-bottom: 30px;
@@ -83,15 +97,18 @@
       padding: 20px;
       border-radius: 10px;
     }
+
     .points-value {
       font-size: 36px;
       font-weight: 700;
       color: #019b61;
     }
+
     .points-label {
       font-size: 16px;
       color: #666;
     }
+
     .redeem-button {
       width: 100%;
       padding: 15px;
@@ -104,9 +121,11 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
+
     .redeem-button:hover {
       background-color: #017d4e;
     }
+
     @media (max-width: 480px) {
       .container {
         padding: 20px;
@@ -116,12 +135,14 @@
         display: flex;
         flex-direction: column;
       }
+
       body {
         background-color: #ffffff;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
@@ -132,32 +153,76 @@
     <div class="profile-info">
       <div class="info-item">
         <div class="info-label">ชื่อ</div>
-        <div class="info-value">สมชาย ใจดี</div>
+        <div class="info-value" id="full-name"></div>
       </div>
       <div class="info-item">
         <div class="info-label">เบอร์โทร</div>
-        <div class="info-value">0812345678</div>
+        <div class="info-value" id="phone-number"></div>
       </div>
     </div>
     <div class="points">
-      <div class="points-value">1,500</div>
+      <div class="points-value" id="credit"></div>
       <div class="points-label">คะแนนสะสม</div>
     </div>
     <button class="redeem-button">แลกคะแนน</button>
   </div>
 
   <script>
-    document.querySelector('.edit-button').addEventListener('click', function() {
+    async function fetchUserData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const phoneNumber = urlParams.get('phone_number');
+
+      if (!phoneNumber) {
+        alert('ไม่พบหมายเลขโทรศัพท์ในURL');
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/users/${phoneNumber}`);
+        if (!response.ok) {
+          throw new Error('ไม่สามารถดึงข้อมูลผู้ใช้ได้');
+        }
+        const userDataArray = await response.json();
+
+        // Ensure we are working with an array and get the first user object
+        if (Array.isArray(userDataArray) && userDataArray.length > 0) {
+          const userData = userDataArray[0]; // Access the first user object
+
+          document.getElementById('full-name').textContent = userData.full_name;
+          document.getElementById('phone-number').textContent = userData.phone_number;
+          document.getElementById('credit').textContent = userData.credit.toLocaleString();
+        } else {
+          alert('ไม่พบข้อมูลผู้ใช้');
+        }
+      } catch (error) {
+        console.error('เกิดข้อผิดพลาด:', error);
+        alert('ไม่สามารถดึงข้อมูลผู้ใช้ได้');
+      }
+    }
+
+    fetchUserData();
+
+    document.querySelector('.edit-button').addEventListener('click', function () {
       alert('เปิดหน้าแก้ไขข้อมูล');
     });
 
-    document.querySelector('.logout-button').addEventListener('click', function() {
+    document.querySelector('.logout-button').addEventListener('click', function () {
       alert('ออกจากระบบ');
     });
 
-    document.querySelector('.redeem-button').addEventListener('click', function() {
-      alert('เปิดหน้าแลกคะแนน');
+    document.querySelector('.redeem-button').addEventListener('click', function () {
+      const fullName = document.getElementById('full-name').textContent;
+      const phoneNumber = document.getElementById('phone-number').textContent;
+      const credit = document.getElementById('credit').textContent.replace(/,/g, ''); // ลบคอมม่าออกจากคะแนน
+
+      // สร้าง URL สำหรับหน้า exchange.html และส่งข้อมูล
+      const url = `exchange.html?full_name=${encodeURIComponent(fullName)}&phone_number=${encodeURIComponent(phoneNumber)}&credit=${encodeURIComponent(credit)}`;
+
+      // เปลี่ยนไปที่หน้า exchange.html
+      window.location.href = url;
     });
+
   </script>
 </body>
+
 </html>

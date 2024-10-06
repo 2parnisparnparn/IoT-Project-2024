@@ -277,7 +277,7 @@
             const data = await response.json();
             showModal('เข้าสู่ระบบสำเร็จ!');
             setTimeout(() => {
-              window.location.href = 'main.html'; // นำผู้ใช้ไปยังหน้า main.html
+              window.location.href = `main.html?phone_number=${phone}`;
             }, 2000); // รอ 2 วินาทีก่อนเปลี่ยนหน้า
           } else {
             const errorData = await response.json();
