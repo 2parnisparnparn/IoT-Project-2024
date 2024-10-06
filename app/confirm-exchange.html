@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ยืนยันการแลกคะแนน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h2 {
+      color: #019b61;
+      font-weight: 700;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .promotion-info {
+      margin-bottom: 30px;
+    }
+    .promotion-label {
+      font-size: 18px;
+      font-weight: 500;
+      color: #666;
+    }
+    .promotion-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+      margin-top: 5px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+    }
+    .button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 45%;
+    }
+    .button.confirm {
+      background-color: #019b61;
+      color: #fff;
+    }
+    .button.confirm:hover {
+      background-color: #017d4e;
+    }
+    .button.back {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+    .button.back:hover {
+      background-color: #bfbfbf;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ยืนยันการแลกคะแนน</h2>
+    <div class="promotion-info">
+        <div class="promotion-label">คุณได้เลือก:</div>
+        <div class="promotion-value" id="promo-description"></div>
+        <div class="promotion-value" id="promo-points"></div>
+    </div>
+    <div class="buttons">
+      <button class="button back" onclick="goBack()">ย้อนกลับ</button>
+      <button class="button confirm" onclick="confirmPromotion()">ตกลง</button>
+    </div>
+  </div>
+
+  <script>
+    function goBack() {
+      window.history.back(); // กลับไปหน้าก่อนหน้านี้
+    }
+
+    function confirmPromotion() {
+      const points = parseInt(getQueryParam('points'), 10);
+      const promoCode = getQueryParam('code');
+      const description = decodeURIComponent(getQueryParam('description'));
+      const phoneNumber = decodeURIComponent(getQueryParam('phone_number'));
+      const currentCredit = parseInt(decodeURIComponent(getQueryParam('credit')), 10);
+
+      // ตรวจสอบความถูกต้องของข้อมูล
+      if (!phoneNumber || isNaN(currentCredit)) {
+        errorMessage.textContent = 'ข้อมูลผู้ใช้ไม่ถูกต้อง';
+        errorMessage.style.display = 'block';
+        loading.style.display = 'none';
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'ตกลง';
+        return;
+      }
+
+      // คำนวณคะแนนใหม่
+      const newCredit = currentCredit - points;
+      if (newCredit < 0) {
+        errorMessage.textContent = 'คะแนนของคุณไม่เพียงพอ';
+        errorMessage.style.display = 'block';
+        loading.style.display = 'none';
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'ตกลง';
+        return;
+      }
+
+      try {
+        // เรียก API เพื่ออัปเดตคะแนน
+        const response = await fetch(`http://localhost:3000/update/${encodeURIComponent(phoneNumber)}/credit`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ credit: newCredit }),
+        });
+
+        if (response.ok) {
+          const updatedUser = await response.json();
+          // เปลี่ยนหน้าไปยังหน้า confirmation.html พร้อมข้อมูลที่อัปเดต
+          window.location.href = "thank.html";
+        } else if (response.status === 404) {
+          errorMessage.textContent = 'ไม่พบผู้ใช้';
+          errorMessage.style.display = 'block';
+        } else if (response.status === 400) {
+          errorMessage.textContent = 'ค่าคะแนนไม่ถูกต้อง';
+          errorMessage.style.display = 'block';
+        } else {
+          const errorData = await response.text();
+          errorMessage.textContent = `ข้อผิดพลาด: ${errorData}`;
+          errorMessage.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error updating credit:', error);
+        errorMessage.textContent = 'เกิดข้อผิดพลาดในการอัปเดตเครดิต';
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    // ฟังก์ชันสำหรับดึงข้อมูลจาก URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    window.onload = function() {
+      const points = getQueryParam('points');
+      const promoCode = getQueryParam('code');
+      const description = decodeURIComponent(getQueryParam('description'));
+
+      // ดึงข้อมูลที่อัปเดตจาก API
+      const currentCredit = points;
+
+      // แสดงผลในหน้ายืนยัน
+      document.getElementById('promo-description').textContent = description;
+      document.getElementById('promo-points').textContent = `ใช้ ${points} คะแนน`;
+    }
+  </script>
+</body>
+</html>

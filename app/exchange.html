@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แลกคะแนน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 380px;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .header-title {
+      font-size: 20px;
+      color: #019b61;
+      font-weight: 700;
+    }
+    .points-section {
+      background-color: #019b61;
+      padding: 15px;
+      border-radius: 10px;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .points-value {
+      font-size: 36px;
+      font-weight: 700;
+    }
+    .points-label {
+      font-size: 16px;
+    }
+    .coupons-section {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .coupon {
+      background-color: #f8f8f8;
+      padding: 15px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+    .coupon:hover {
+      background-color: #e0f7e9;
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    .coupon.active {
+      border: 2px solid #019b61;
+      background-color: #d2f2df;
+    }
+    .coupon img {
+      width: 60px;
+      height: 60px;
+    }
+    .coupon-details {
+      flex-grow: 1;
+      margin-left: 15px;
+    }
+    .coupon-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+    .coupon-points {
+      font-size: 16px;
+      font-weight: 500;
+      color: #019b61;
+    }
+    .redeem-button {
+        background-color: #019b61;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 15px auto 0;
+        display: block;
+        transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .redeem-button:hover {
+      background-color: #017d4e;
+      transform: scale(1.1);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="header-title">คุณ ' <b id="user-name">  </b>'</span>
+    </div>
+    <div class="points-section">
+      <div class="points-value" id="points"> </div> 
+      <div class="points-label">คะแนนสะสม</div>
+    </div>
+
+    <div class="coupons-section" id="coupons-section">
+      <div class="coupon" data-points="1" data-code="PROMO1">
+        <img src="https://cdn-icons-png.flaticon.com/128/590/590749.png" alt="CodeClean">
+        <div class="coupon-details">
+          <div class="coupon-title">แลก 1 คะแนน</div>
+          <div class="coupon-points">ส่วนลด 10 บาท</div>
+        </div>
+      </div>
+
+      <div class="coupon" data-points="100" data-code="PROMO2">
+        <img src="https://cdn-icons-png.flaticon.com/128/1473/1473348.png" alt="Banana Snack">
+        <div class="coupon-details">
+          <div class="coupon-title">แลก 100 คะแนน</div>
+          <div class="coupon-points">แลกฟรี ข้าวผัดโอ้ลั้ลล้า</div>
+        </div>
+      </div>
+
+      <div class="coupon" data-points="3000" data-code="PROMO3">
+        <img src="https://cdn-icons-png.flaticon.com/128/3437/3437515.png" alt="Fried Rice">
+        <div class="coupon-details">
+          <div class="coupon-title">แลก 3,000 คะแนน</div>
+          <div class="coupon-points">แลกฟรี set น้ำดื่มเพื่อสุขภาพ</div>
+        </div>
+      </div>
+
+      <div class="coupon" data-points="5400" data-code="PROMO4">
+        <img src="https://cdn-icons-png.flaticon.com/128/776/776531.png" alt="Eggs">
+        <div class="coupon-details">
+          <div class="coupon-title">แลก 5,400 คะแนน</div>
+          <div class="coupon-points">แลกฟรี กระเป๋าเดินทาง</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="redeem-button" id="redeem-btn" disabled>แลกคะแนน</button>
+  </div>
+
+  <script>
+    // ฟังก์ชันสำหรับดึงข้อมูลจาก URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // ดึงค่าจาก URL
+    const fullName = decodeURIComponent(getQueryParam('full_name')) || 'สมชาย ใจดี';
+    const phoneNumber = getQueryParam('phone_number') || '';
+    const credit = getQueryParam('credit') || '0';
+
+    // แสดงผลชื่อและคะแนนในหน้า HTML
+    document.getElementById('user-name').textContent = fullName;
+    document.getElementById('points').textContent = credit;
+
+    const pointsAvailable = parseInt(credit, 10); // ใช้คะแนนจาก URL
+    const coupons = document.querySelectorAll('.coupon');
+    const redeemButton = document.getElementById('redeem-btn');
+    let selectedCoupon = null; // เก็บข้อมูลคูปองที่ถูกเลือก
+
+    // แสดงเฉพาะคูปองที่สามารถแลกได้
+    coupons.forEach(coupon => {
+      const couponPoints = parseInt(coupon.getAttribute('data-points'));
+      if (couponPoints > pointsAvailable) {
+        coupon.style.display = 'none'; // ซ่อนคูปองที่แลกไม่ได้
+      } else {
+        coupon.addEventListener('click', () => {
+          // ล้างคูปองที่ถูกเลือกก่อนหน้า
+          if (selectedCoupon) {
+            selectedCoupon.classList.remove('active');
+          }
+          // ตั้งค่าคูปองที่ถูกเลือก
+          coupon.classList.add('active');
+          selectedCoupon = coupon;
+          redeemButton.disabled = false; // เปิดปุ่มแลกคะแนนเมื่อมีการเลือกคูปอง
+        });
+      }
+    });
+
+    // เมื่อกดปุ่มแลกคะแนน
+    redeemButton.addEventListener('click', () => {
+      if (selectedCoupon) {
+        const points = selectedCoupon.getAttribute('data-points');
+        const promoCode = selectedCoupon.getAttribute('data-code');
+        const description = selectedCoupon.querySelector('.coupon-points').textContent;
+
+        // ส่งข้อมูลไปหน้ายืนยัน
+        window.location.href = `confirm-exchange.html?points=${encodeURIComponent(points)}&code=${encodeURIComponent(promoCode)}&description=${encodeURIComponent(description)}&phone_number=${encodeURIComponent(phoneNumber)}&credit=${encodeURIComponent(credit)}`;
+      }
+    });
+  </script>
+</body>
+</html>
