@@ -37,6 +37,12 @@
             color: #FFFFFF; /* White text */
         }
 
+        .header-bill{
+            color: #FFFFFF; /* White text */
+            font-size: 20px;
+            font-weight: bolder;
+        }
+
         .content {
             display: flex;
             justify-content: space-between;
@@ -187,139 +193,153 @@
 </head>
 <body>
 
-<div class="container">
-    <div class="header">ดำเนินการสำเร็จ</div>
-
-    <div class="content">
-        <!-- Left Section -->
-        <div class="left-section">
-            <div class="phone" id="phoneDisplay">000-00000000</div>
-            <div class="score" id="currentCreditDisplay">15.55 คะแนน</div>
-            <div class="total">รวม: <span id="totalCreditDisplay">172</span></div>
-
-            <div class="item-section">
-                <div class="item">
-                    <img src="image/pet.png" alt="Clear Bottle">
-                    <span id="petCountDisplay">5</span> <!-- Set default value here -->
+    <div class="container">
+        <div class="header">ดำเนินการสำเร็จ</div>
+    
+        <div class="content">
+            <!-- Left Section -->
+            <div class="left-section">
+                <div class="phone" id="phoneDisplay">หมายเลขโทรศัพท์: 000-00000000</div>
+                <div class="score" id="currentCreditDisplay">15.55 คะแนน</div>
+                <div class="total">รวม: <span id="totalCreditDisplay">172</span></div>
+    
+                <div class="item-section">
+                    <div class="item">
+                        <img src="image/pet.png" alt="Clear Bottle">
+                        <span id="petCountDisplay">5</span>
+                    </div>
+                    <div class="item">
+                        <img src="image/can.png" alt="Can">
+                        <span id="canCountDisplay">5</span>
+                    </div>
                 </div>
-
-                <div class="item">
-                    <img src="image/can.png" alt="Can">
-                    <span id="canCountDisplay">5</span> <!-- Set default value here -->
+            </div>
+    
+            <!-- Right Section -->
+            <div class="right-section">
+                <div class="header-bill">รายละเอียดการทำรายการ</div>
+                <table>
+                    <tr>
+                        <td><strong>หมายเลขโทรศัพท์</strong></td>
+                        <td><span id="phonenumber"></span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>เวลา</strong></td>
+                        <td id="currentTimeDisplay">00:00</td>
+                    </tr>
+                </table>
+                <table>
+                    <tr>
+                        <td><strong>รายละเอียดขวด</strong></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td id="petCountDisplayRow"><span id="petCountResult">5</span></td>
+                        <td class="near-count">พลาสติก</td>
+                        <td><span id="petCountResult"></span> × <span id="PET_CREDIT">0.1</span> = <span id="petCredit">5</span></td>
+                    </tr>
+                    <tr>
+                        <td id="canCountDisplayRow"><span id="canCountResult">5</span></td>
+                        <td class="near-count">กระป๋อง</td>
+                        <td><span id="canCountResult"></span> × <span id="CAN_CREDIT">1.5</span> = <span id="canCredit">7.5</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>จำนวน</strong></td>
+                        <td></td>
+                        <td id="itemCount">0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>คาร์บอนเครดิต</strong></td>
+                        <td></td>
+                        <td id="currentCredit">0.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>คาร์บอนเครดิตทั้งหมด</strong></td>
+                        <td></td>
+                        <td id="totalCredit">0.00</td>
+                    </tr>
+                </table>
+                
+                <div class="note">
+                    ขวดพลาสติกใส (PET): สมมุติว่าให้ 0.1 คาร์บอนเครดิตต่อขวด<br>
+                    กระป๋อง (อลูมิเนียม): สมมุติว่าให้ 0.15 คาร์บอนเครดิตต่อขวด
                 </div>
             </div>
         </div>
-
-        <!-- Right Section -->
-        <div class="right-section">
-            <table>
-                <tr>
-                    <td><strong>รายละเอียดการทำรายการ</strong></td>
-                </tr>
-                <tr>
-                    <td><strong>เวลา</strong></td>
-                    <td></td>
-                    <td id="phoneTableDisplay">000-00000000</td>
-                </tr>
-                <tr>
-                    <td><strong>รายละเอียดขวด</strong></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td id="petCountDisplayRow"><span id="petCountResult">5</span></td>
-                    <td class="near-count">พลาสติกใส</td>
-                    <td><span id="petCountResult"></span> × <span id="PET_CREDIT">0.1</span> = <span id="petCredit">5</span></td>
-                </tr>
-               
-                <tr>
-                    <td id="canCountDisplayRow"><span id="canCountResult">5</span></td>
-                    <td class="near-count">กระป๋อง</td>
-                    <td><span id="canCountResult"></span> × <span id="CAN_CREDIT">1.5</span> = <span id="canCredit">7.5</span></td>
-                </tr>
-                <tr>
-                    <td><strong>จำนวน</strong></td>
-                    <td></td>
-                    <td id="itemCount"></td>
-                </tr>
-                <tr>
-                    <td><strong>คาร์บอนเครดิต</strong></td>
-                    <td></td>
-                    <td id="currentCredit">0.00</td>
-                </tr>
-                <tr>
-                    <td><strong>คาร์บอนเครดิตทั้งหมด</strong></td>
-                    <td></td>
-                    <td id="totalCredit">0.00</td>
-                </tr>
-            </table>
-            
-            <div class="note">
-                ขวดพลาสติกใส (PET): สมมุติว่าให้ 0.1 คาร์บอนเครดิตต่อขวด<br>
-                <!-- ขวดพลาสติกสี: สมมุติว่าให้ 0.08 คาร์บอนเครดิตต่อขวด<br> -->
-                กระป๋อง (อลูมิเนียม): สมมุติว่าให้ 0.15 คาร์บอนเครดิตต่อกระป๋อง
-            </div>
-            
+        <div class="button-section">
+            <button class="button continue-button" id="submitBillButton" onclick="goBack">ตกลง</button>
         </div>
     </div>
-    <div class="button-section">
-        <button class="button continue-button" onclick="goBack()">ตกลง</button>
-    </div>
-</div>
-
-<script>
-    // Constants for credit calculations
-    const PET_CREDIT = 0.1; // Carbon credit per PET bottle
-    const CAN_CREDIT = 0.15; // Carbon credit per can
-
-    // Get URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const plasticCount = urlParams.get('plastic') || 0;
-    const canCount = urlParams.get('can') || 0;
-    const phoneNumber = urlParams.get('phone-number') || '000-00000000';
-
-    // Display phone number
-    document.getElementById("phoneDisplay").innerText = 'หมายเลขโทรศัพท์ ' + phoneNumber;
-    document.getElementById("phoneTableDisplay").innerText = phoneNumber;
-
-    // Display plastic and can counts
-    document.getElementById("petCountDisplay").innerText = plasticCount;
-    document.getElementById("canCountDisplay").innerText = canCount;
-
-    // Update table values
-    document.getElementById("petCountResult").innerText = plasticCount;
-    document.getElementById("canCountResult").innerText = canCount;
-
-    // Calculate credit
-    const petCredit = plasticCount * PET_CREDIT;
-    const canCredit = canCount * CAN_CREDIT;
-
-    // Update carbon credits
-    document.getElementById("petCredit").innerText = petCredit.toFixed(2);
-    document.getElementById("canCredit").innerText = canCredit.toFixed(2);
-
-    // Calculate total credits
-    const totalCredits = (petCredit + canCredit).toFixed(2);
-    document.getElementById("currentCredit").innerText = totalCredits;
-    document.getElementById("currentCreditDisplay").innerText = totalCredits + ' คะแนน';
-    document.getElementById("totalCredit").innerText = totalCredits;
-    document.getElementById("totalCreditDisplay").innerText = totalCredits;
     
-    // Calculate total items
-    const totalItemCount = parseInt(plasticCount) + parseInt(canCount);
-    document.getElementById("itemCount").innerText = totalItemCount;
+    <script src="api.js"></script>
+    <script>
+        const bottleApiUrl = 'http://localhost:3000/api/bottle/';
+        const addBillApiUrl = 'http://localhost:3000/api/add-bill';
+    
+        // Fetch URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const plasticCount = parseInt(urlParams.get('plastic')) || 0;
+        const canCount = parseInt(urlParams.get('can')) || 0;
+        const phoneNumber = urlParams.get('phone-number') || '000-00000000';
+    
+        // Display phone number and time
+        document.getElementById("phoneDisplay").innerText = 'หมายเลขโทรศัพท์: ' + phoneNumber;
+        document.getElementById("phonenumber").innerText = phoneNumber;
+        const currentTime = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+        document.getElementById("currentTimeDisplay").innerText = currentTime;
+    
+        // Calculate and display values
+        async function calculateAndDisplayValues() {
+            const plasticCredit = await fetchBottleCredit('plastic');
+            const canCredit = await fetchBottleCredit('can');
+    
+            const totalPlasticCredit = plasticCount * plasticCredit;
+            const totalCanCredit = canCount * canCredit;
+            const totalCredit = totalPlasticCredit + totalCanCredit;
+            const totalItemCount = plasticCount + canCount;
+    
+            document.getElementById("petCountResult").innerText = plasticCount;
+            document.getElementById("canCountResult").innerText = canCount;
+            document.getElementById("PET_CREDIT").innerText = plasticCredit.toFixed(2);
+            document.getElementById("CAN_CREDIT").innerText = canCredit.toFixed(2);
+            document.getElementById("petCredit").innerText = totalPlasticCredit.toFixed(2);
+            document.getElementById("canCredit").innerText = totalCanCredit.toFixed(2);
+            document.getElementById("currentCredit").innerText = totalCredit.toFixed(2);
+            document.getElementById("totalCredit").innerText = totalCredit.toFixed(2);
+            document.getElementById("itemCount").innerText = totalItemCount;
+        }
+    
+        async function calculateAndAddBill() {
+            await calculateAndDisplayValues();
+    
+            const billData = {
+                phone_number: phoneNumber,
+                bottles: [
+                    { bottle_id: "plastic_id_1", count: plasticCount, bt_credit: parseFloat(document.getElementById("petCredit").innerText) },
+                    { bottle_id: "can_id_2", count: canCount, bt_credit: parseFloat(document.getElementById("canCredit").innerText) }
+                ],
+                all_count: parseInt(document.getElementById("itemCount").innerText),
+                credit: parseFloat(document.getElementById("totalCredit").innerText)
+            };
+    
+            const result = await addBill(billData, addBillApiUrl);
+            if (result) {
+                alert('บันทึกบิลสำเร็จ: ' + JSON.stringify(result));
+            }
+        }
 
-      // Go back function
-      function goBack() {
+        function goBack() {
         window.location.href = 'index.html'; // Redirects to index.html
     }
-
-    // Continue to next step function (Redirects to index.html)
-    function continueToNext() {
-        window.location.href = 'index.html'; // Redirects to index.html
-    }
-
     
-</script>
-
-</body>
-</html>
+        // Trigger calculations and display when the page loads
+        (async () => {
+            await calculateAndDisplayValues();
+        })();
+    
+        // Trigger bill addition on button click
+        document.getElementById("submitBillButton").addEventListener('click', calculateAndAddBill);
+    </script>
+    
+    </body>
+    </html>
