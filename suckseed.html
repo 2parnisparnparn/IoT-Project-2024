@@ -185,6 +185,7 @@
             color: #AAAAAA; /* Light grey text */
             text-align: center;
         }
+        
 
         .left-section, .right-section {
     flex-shrink: 0; /* ป้องกันไม่ให้ส่วนนี้ขยายหรือหดเกินขนาดที่กำหนด */
@@ -201,7 +202,7 @@
             <div class="left-section">
                 <div class="phone" id="phoneDisplay">หมายเลขโทรศัพท์: 000-00000000</div>
                 <div class="score" id="currentCreditDisplay">15.55 คะแนน</div>
-                <div class="total">รวม: <span id="totalCreditDisplay">172</span></div>
+                <div class="total">เครดิตทั้งหมด: <span id="totalCredit">172</span></div>
     
                 <div class="item-section">
                     <div class="item">
@@ -218,6 +219,7 @@
             <!-- Right Section -->
             <div class="right-section">
                 <div class="header-bill">รายละเอียดการทำรายการ</div>
+                <h2></h2>
                 <table>
                     <tr>
                         <td><strong>หมายเลขโทรศัพท์</strong></td>
@@ -225,39 +227,50 @@
                     </tr>
                     <tr>
                         <td><strong>เวลา</strong></td>
-                        <td id="currentTimeDisplay">00:00</td>
+                        <td id="currentTimeDisplay">00:00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> <!-- Add multiple &nbsp; -->
                     </tr>
                 </table>
+                
                 <table>
                     <tr>
                         <td><strong>รายละเอียดขวด</strong></td>
-                        <td></td>
+                       
                     </tr>
-                    <tr>
-                        <td id="petCountDisplayRow"><span id="petCountResult">5</span></td>
-                        <td class="near-count">พลาสติก</td>
-                        <td><span id="petCountResult"></span> × <span id="PET_CREDIT">0.1</span> = <span id="petCredit">5</span></td>
-                    </tr>
-                    <tr>
-                        <td id="canCountDisplayRow"><span id="canCountResult">5</span></td>
-                        <td class="near-count">กระป๋อง</td>
-                        <td><span id="canCountResult"></span> × <span id="CAN_CREDIT">1.5</span> = <span id="canCredit">7.5</span></td>
-                    </tr>
+                    <table>
+                        
+                        <tr>
+                            <td id="petCountDisplayRow"><span id="petCountResult">5</span></td>
+                           
+                            <td class="near-count">พลาสติก</td>
+                            <td><span id="petCountResult"></span> × <span id="PET_CREDIT">0.1</span> = <span id="petCredit">5</span></td>
+                        </tr>
+                        <tr>
+                            <td id="canCountDisplayRow"><span id="canCountResult">5</span></td>
+                            <td class="near-count">กระป๋อง</td>
+                            <td><span id="canCountResult"></span> × <span id="CAN_CREDIT">1.5</span> = <span id="canCredit">7.5</span></td>
+                        </tr>
+                    </table>
+                </table>
+                <table>
+
                     <tr>
                         <td><strong>จำนวน</strong></td>
-                        <td></td>
                         <td id="itemCount">0</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        
+
                     </tr>
                     <tr>
                         <td><strong>คาร์บอนเครดิต</strong></td>
-                        <td></td>
                         <td id="currentCredit">0.00</td>
-                    </tr>
-                    <tr>
-                        <td><strong>คาร์บอนเครดิตทั้งหมด</strong></td>
                         <td></td>
-                        <td id="totalCredit">0.00</td>
+                        <td></td>
+                        <td></td>
+                        
                     </tr>
+                   
                 </table>
                 
                 <div class="note">
@@ -272,74 +285,88 @@
     </div>
     
     <script src="api.js"></script>
-    <script>
-        const bottleApiUrl = 'http://localhost:3000/api/bottle/';
-        const addBillApiUrl = 'http://localhost:3000/api/add-bill';
-    
-        // Fetch URL params
-        const urlParams = new URLSearchParams(window.location.search);
-        const plasticCount = parseInt(urlParams.get('plastic')) || 0;
-        const canCount = parseInt(urlParams.get('can')) || 0;
-        const phoneNumber = urlParams.get('phone-number') || '000-00000000';
-    
-        // Display phone number and time
-        document.getElementById("phoneDisplay").innerText = 'หมายเลขโทรศัพท์: ' + phoneNumber;
-        document.getElementById("phonenumber").innerText = phoneNumber;
-        const currentTime = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
-        document.getElementById("currentTimeDisplay").innerText = currentTime;
-    
-        // Calculate and display values
-        async function calculateAndDisplayValues() {
-            const plasticCredit = await fetchBottleCredit('plastic');
-            const canCredit = await fetchBottleCredit('can');
-    
-            const totalPlasticCredit = plasticCount * plasticCredit;
-            const totalCanCredit = canCount * canCredit;
-            const totalCredit = totalPlasticCredit + totalCanCredit;
-            const totalItemCount = plasticCount + canCount;
-    
-            document.getElementById("petCountResult").innerText = plasticCount;
-            document.getElementById("canCountResult").innerText = canCount;
-            document.getElementById("PET_CREDIT").innerText = plasticCredit.toFixed(2);
-            document.getElementById("CAN_CREDIT").innerText = canCredit.toFixed(2);
-            document.getElementById("petCredit").innerText = totalPlasticCredit.toFixed(2);
-            document.getElementById("canCredit").innerText = totalCanCredit.toFixed(2);
-            document.getElementById("currentCredit").innerText = totalCredit.toFixed(2);
-            document.getElementById("totalCredit").innerText = totalCredit.toFixed(2);
-            document.getElementById("itemCount").innerText = totalItemCount;
-        }
-    
-        async function calculateAndAddBill() {
-            await calculateAndDisplayValues();
-    
-            const billData = {
-                phone_number: phoneNumber,
-                bottles: [
-                    { bottle_id: "plastic_id_1", count: plasticCount, bt_credit: parseFloat(document.getElementById("petCredit").innerText) },
-                    { bottle_id: "can_id_2", count: canCount, bt_credit: parseFloat(document.getElementById("canCredit").innerText) }
-                ],
-                all_count: parseInt(document.getElementById("itemCount").innerText),
-                credit: parseFloat(document.getElementById("totalCredit").innerText)
-            };
-    
-            const result = await addBill(billData, addBillApiUrl);
-            if (result) {
-                alert('บันทึกบิลสำเร็จ: ' + JSON.stringify(result));
-            }
-        }
+<script>
+    // Fetch URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const plasticCount = parseInt(urlParams.get('plastic')) || 0;
+    const canCount = parseInt(urlParams.get('can')) || 0;
+    const phoneNumber = urlParams.get('phone-number') || '000-00000000';
 
-        function goBack() {
+    // Display phone number and time
+    document.getElementById("phoneDisplay").innerText = 'หมายเลขโทรศัพท์: ' + phoneNumber;
+    document.getElementById("phonenumber").innerText = phoneNumber;
+    const currentTime = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+    document.getElementById("currentTimeDisplay").innerText = currentTime;
+
+    let plasticBottleId = '';
+    let canBottleId = '';
+
+    // Calculate and display values
+    async function calculateAndDisplayValues() {
+    // Fetch the bottle data including carbon_credit and bottle_id
+    const plasticBottle = await fetchBottleCredit('plastic');
+    const canBottle = await fetchBottleCredit('can');
+
+    // Store bottle ids for use in the bill
+    plasticBottleId = plasticBottle.bottle_id;
+    canBottleId = canBottle.bottle_id;
+
+    const totalPlasticCredit = plasticCount * plasticBottle.carbon_credit;
+    const totalCanCredit = canCount * canBottle.carbon_credit;
+    const totalCredit = totalPlasticCredit + totalCanCredit;
+    const totalItemCount = plasticCount + canCount;
+
+    // Display the values on the page
+    document.getElementById("petCountResult").innerText = plasticCount;
+    document.getElementById("canCountResult").innerText = canCount;
+    document.getElementById("PET_CREDIT").innerText = plasticBottle.carbon_credit.toFixed(2);
+    document.getElementById("CAN_CREDIT").innerText = canBottle.carbon_credit.toFixed(2);
+    document.getElementById("petCredit").innerText = totalPlasticCredit.toFixed(2);
+    document.getElementById("canCredit").innerText = totalCanCredit.toFixed(2);
+    document.getElementById("currentCredit").innerText = totalCredit.toFixed(2);
+    document.getElementById("totalCredit").innerText = totalCredit.toFixed(2);  // Update totalCredit here
+    document.getElementById("itemCount").innerText = totalItemCount;
+}
+
+
+    async function calculateAndAddBill() {
+    await calculateAndDisplayValues();
+
+    const billData = {
+        phone_number: phoneNumber,
+        bottles: [
+            { bottle_id: plasticBottleId, count: plasticCount, bt_credit: parseFloat(document.getElementById("petCredit").innerText) },
+            { bottle_id: canBottleId, count: canCount, bt_credit: parseFloat(document.getElementById("canCredit").innerText) }
+        ],
+        all_count: parseInt(document.getElementById("itemCount").innerText),
+        credit: parseFloat(document.getElementById("totalCredit").innerText)
+    };
+
+    try {
+        const result = await addBill(billData);
+        if (result) {
+            // alert('บันทึกบิลสำเร็จ: ' + JSON.stringify(result));
+            goBack();
+        }
+    } catch (error) {
+        alert('Failed to add bill: ' + error.message);
+    }
+}
+
+
+    function goBack() {
         window.location.href = 'index.html'; // Redirects to index.html
     }
-    
-        // Trigger calculations and display when the page loads
-        (async () => {
-            await calculateAndDisplayValues();
-        })();
-    
-        // Trigger bill addition on button click
-        document.getElementById("submitBillButton").addEventListener('click', calculateAndAddBill);
-    </script>
+
+    // Trigger calculations and display when the page loads
+    (async () => {
+        await calculateAndDisplayValues();
+    })();
+
+    // Trigger bill addition on button click
+    document.getElementById("submitBillButton").addEventListener('click', calculateAndAddBill);
+</script>
+
     
     </body>
     </html>
