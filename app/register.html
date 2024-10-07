@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
+      position: relative;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #019b61;
+      font-weight: 700;
+      font-size: 28px;
+    }
+    .subtext {
+      text-align: center;
+      color: #777;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #666;
+      font-weight: 500;
+    }
+    input[type="text"], input[type="tel"], input[type="password"] {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background-color: #f5f5f5;
+      color: #333;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #046b3d;
+    }
+    input::placeholder {
+      color: #999;
+    }
+    .flag-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    input[type="tel"] {
+      padding-left: 40px;
+    }
+    .password-group {
+      position: relative;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #666;
+    }
+    .error-message {
+      color: red;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background-color: #019b61;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #017d4e;
+    }
+    .login-link {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .login-link a {
+      color: #019b61;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    @keyframes slideLeft {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideRight {
+      from { transform: translateX(-100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutLeft {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(-100%); opacity: 0; }
+    }
+    @keyframes slideOutRight {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        border-radius: 0;
+        box-shadow: none;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      body {
+        background-color: #ffffff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>สมัครสมาชิก</h2>
+    <p class="subtext">สร้างบัญชีเพื่อดำเนินการต่อ!</p>
+    <form id="registrationForm" onsubmit="return validateForm()">
+      <div class="form-group">
+        <label for="name">ชื่อ</label>
+        <input type="text" id="name" name="name" placeholder="ชื่อ-นามสกุล" required>
+      </div>
+      <div class="form-group">
+        <label for="phone">หมายเลขโทรศัพท์</label>
+        <span class="flag-icon">🇹🇭</span>
+        <input type="tel" id="phone" name="phone" placeholder="123-4567890" required>
+        <div id="phoneError" class="error-message"></div>
+      </div>
+      <div class="form-group password-group">
+        <label for="password">รหัสผ่าน</label>
+        <input type="password" id="password" name="password" placeholder="รหัสผ่าน" required>
+        <span class="toggle-password" onclick="togglePassword()">⦾</span>
+      </div>
+      <div class="form-group password-group">
+        <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="ยืนยันรหัสผ่าน" required>
+        <span class="toggle-password" onclick="toggleConfirmPassword()">⦾</span>
+        <div id="confirmPasswordError" class="error-message"></div>
+      </div>
+      <button type="submit">สมัครสมาชิก</button>
+    </form>
+    <div class="login-link">
+      <p>มีบัญชีอยู่แล้ว? <a href="index.html">เข้าสู่ระบบ</a></p>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const passwordToggle = document.querySelector('.toggle-password');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordToggle.textContent = '∅'; // change to an eye-off emoji
+      } else {
+        passwordInput.type = 'password';
+        passwordToggle.textContent = '⦾'; // change back to an eye emoji
+      }
+    }
+
+    function toggleConfirmPassword() {
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+      const confirmPasswordToggle = document.querySelectorAll('.toggle-password')[1];
+
+      if (confirmPasswordInput.type === 'password') {
+        confirmPasswordInput.type = 'text';
+        confirmPasswordToggle.textContent = '∅'; // change to an eye-off emoji
+      } else {
+        confirmPasswordInput.type = 'password';
+        confirmPasswordToggle.textContent = '⦾'; // change back to an eye emoji
+      }
+    }
+
+    function validateForm() {
+      const phoneInput = document.getElementById('phone');
+      const phoneError = document.getElementById('phoneError');
+      const passwordInput = document.getElementById('password');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+      const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+      // Reset error messages
+      phoneError.textContent = '';
+      confirmPasswordError.textContent = '';
+
+      // Validate phone number
+      if (phoneInput.value.length !== 10) {
+        phoneError.textContent = 'Phone number must be 10 digits long.';
+        return false; // Prevent form submission
+      }
+
+      // Validate password match
+      if (passwordInput.value !== confirmPasswordInput.value) {
+        confirmPasswordError.textContent = 'Passwords do not match.';
+        return false; // Prevent form submission
+      }
+
+      // If everything is valid, redirect to index.html
+      window.location.href = 'index.html';
+      return false; // Prevent default form submission
+    }
+  </script>
+</body>
+</html>
