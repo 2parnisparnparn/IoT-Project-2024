@@ -115,12 +115,25 @@
       transform: scale(1.1);
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
     }
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        border-radius: 0;
+        box-shadow: none;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      body {
+        background-color: #ffffff;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <span class="header-title">คุณ ' <b id="user-name">  </b>'</span>
+      <span class="header-title">คุณ ' <b id="user-name">  </b> '</span>
     </div>
     <div class="points-section">
       <div class="points-value" id="points"> </div> 

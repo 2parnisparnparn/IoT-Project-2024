@@ -12,13 +12,17 @@
       box-sizing: border-box;
       font-family: 'Prompt', sans-serif;
     }
+
     body {
       background-color: #f0f0f0;
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
       min-height: 100vh;
+      text-align: center;
     }
+
     .container {
       background-color: #ffffff;
       padding: 30px;
@@ -26,38 +30,49 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 400px;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
+
     h2 {
       color: #019b61;
       font-weight: 700;
       font-size: 24px;
       margin-bottom: 20px;
     }
+
     .promotion-info {
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
+
     .promotion-label {
       font-size: 18px;
       font-weight: 500;
       color: #666;
     }
+
     .promotion-value {
       font-size: 22px;
       font-weight: 700;
       color: #333;
       margin-top: 5px;
     }
+
     .loading {
-      display: none; /* ซ่อนข้อความเมื่อเริ่มต้น */
+      display: none;
       font-size: 18px;
       color: #019b61;
       margin-bottom: 10px;
     }
+
     .buttons {
       display: flex;
       justify-content: space-around;
+      width: 100%;
     }
+
     .button {
       padding: 10px 20px;
       border: none;
@@ -68,19 +83,38 @@
       transition: background-color 0.3s ease;
       width: 45%;
     }
+
     .button.confirm {
       background-color: #019b61;
       color: #fff;
     }
+
     .button.confirm:hover {
       background-color: #017d4e;
     }
+
     .button.back {
       background-color: #e0e0e0;
       color: #333;
     }
+
     .button.back:hover {
       background-color: #bfbfbf;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        border-radius: 0;
+        box-shadow: none;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      body {
+        background-color: #ffffff;
+      }
     }
   </style>
 </head>

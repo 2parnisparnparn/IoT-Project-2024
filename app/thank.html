@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ขอบคุณสำหรับการแลกคะแนน</title>
+  <title>ขอบคุณ</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -17,7 +17,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
       min-height: 100vh;
+      text-align: center;
     }
     .container {
       background-color: #ffffff;
@@ -27,6 +29,10 @@
       width: 100%;
       max-width: 400px;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
     .thank-you-icon {
       width: 100px;
@@ -45,7 +51,7 @@
     p {
       font-size: 18px;
       color: #333;
-      margin-bottom: 30px;
+      margin: 2%;
     }
     .button {
       padding: 12px 25px;
@@ -55,6 +61,7 @@
       color: #fff;
       font-size: 18px;
       font-weight: 700;
+      margin-top: 30px;
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
       text-decoration: none;
@@ -65,13 +72,27 @@
       transform: scale(1.05);
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
     }
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        border-radius: 0;
+        box-shadow: none;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      body {
+        background-color: #ffffff;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="thank-you-icon"></div>
     <h2>ขอบคุณสำหรับการแลกคะแนน!</h2>
-    <p>คุณได้แลกคะแนนเรียบร้อยแล้ว เราหวังว่าคุณจะมีความสุขกับรางวัลของคุณ</p>
+    <p>คุณได้แลกคะแนนเรียบร้อยแล้ว </p>
+    <p> เราหวังว่าคุณจะมีความสุขกับรางวัลของคุณ</p>
     <a href="index.html" class="button">กลับสู่หน้าหลัก</a>
   </div>
 </body>
