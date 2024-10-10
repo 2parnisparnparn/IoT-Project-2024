@@ -54,3 +54,17 @@ async function addBill(billData, addBillApiUrl = `${API_BASE_URL}/add-bill`) {
         throw new Error("Failed to add bill");
     }
 }
+
+async function getCradit(phoneNumber) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/${phoneNumber}`);
+        if (!response.ok) {
+            throw new Error('Error fetching data');
+        }
+        const data = await response.json(); 
+        return data[0].credit;
+    } catch (error) {
+        console.error('Error checking user:', error);
+        throw new Error('Connection error');
+    }
+}

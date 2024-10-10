@@ -9,7 +9,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>
-
+    <script src="api.js"></script>
     <style>
         body {
             font-family: 'Prompt', sans-serif;
@@ -210,7 +210,7 @@
                 <div class="box-name-content">
                     <div>
                         หมายเลขโทรศัพท์ <b id="phone-number"> </b> <br>
-                        คุณมีเครดิต <b> 150 คะแนน </b> แล้วนะ
+                        คุณมีเครดิต <b id="credit"> คะแนน </b> แล้วนะ
                     </div>
                     <div>
                         <img src="https://cdn-icons-png.flaticon.com/128/12487/12487015.png" alt="sawasdee">
@@ -234,6 +234,7 @@
         const video = document.getElementById('video');
         const collectedPredictions = [];
         const maxPredictions = 10;
+        
 
         // โหลดข้อมูลจาก config.json
         fetch('config.json')
@@ -332,13 +333,30 @@
                 });
         }
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const phoneNumber = urlParams.get('phone-number');
+        document.getElementById('phone-number').textContent = phoneNumber;
+        updateCredit(phoneNumber);
+
+        async function updateCredit(phoneNumber) {
+            try {
+                const credit = await getCradit(phoneNumber); // รอการดึงค่า credit จากฟังก์ชัน getCradit
+                document.getElementById('credit').textContent = `${credit}`; // อัปเดตค่า credit ในหน้าเว็บ
+            } catch (error) {
+                document.getElementById('credit').textContent = 'ไม่สามารถดึงข้อมูลเครดิตได้'; // แสดงข้อความเมื่อเกิดข้อผิดพลาด
+                console.error('Error fetching credit:', error);
+            }
+        }
+
         function sentData() {
             const plasticQty = document.getElementById('plastic-qty').textContent;
             const canQty = document.getElementById('can-qty').textContent;
             const phoneNumber = document.getElementById('phone-number').textContent.trim();
-            const url = `suckseed.html?plastic=${plasticQty}&can=${canQty}&phone-number=${phoneNumber}`;
+            const credit = document.getElementById('credit').textContent;
+            const url = `suckseed.html?plastic=${plasticQty}&can=${canQty}&phone-number=${phoneNumber}&credit=${credit}`;
             window.location.href = url;
         }
+
     </script>
 </body>
 
