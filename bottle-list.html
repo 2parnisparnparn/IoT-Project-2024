@@ -289,38 +289,64 @@
         }
 
         // ประมวลผลผลลัพธ์การตรวจจับ
-        function processResults() {
-            if (collectedPredictions.length === 0) {
-                console.log("No object detected.");
-                return;
+function processResults() {
+    if (collectedPredictions.length === 0) {
+        console.log("No object detected.");
+        return;
+    }
+
+    const counts = collectedPredictions.reduce((acc, className) => {
+        acc[className] = (acc[className] || 0) + 1;
+        return acc;
+    }, {});
+
+    const maxClass = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    const maxCount = counts[maxClass];
+
+    // เรียกใช้งาน URL ที่กำหนดเมื่อมีการตรวจจับวัตถุ
+    fetch("http://172.20.10.2/rotate")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        
-            const counts = collectedPredictions.reduce((acc, className) => {
-                acc[className] = (acc[className] || 0) + 1;
-                return acc;
-            }, {});
-        
-            const maxClass = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-            const maxCount = counts[maxClass];
-        
-            updateResult(maxClass, maxCount);
-        
-            // ล้างข้อมูลที่เก็บไว้
-            collectedPredictions.length = 0;
-        }
+            return response.text(); // หรือ response.json() ขึ้นอยู่กับว่าต้องการข้อมูลประเภทไหน
+        })
+        .then(data => {
+            console.log('Success:', data); // แสดงข้อมูลที่ได้รับจากเซิร์ฟเวอร์
+        })
+        .catch(error => {
+            console.error('Error calling rotation API:', error);
+        });
+
+    updateResult(maxClass, maxCount);
+
+    // ล้างข้อมูลที่เก็บไว้
+    collectedPredictions.length = 0;
+}
 
         // อัปเดตผลลัพธ์บน UI
         function updateResult(maxClass, maxCount) {
-            if (maxClass === 'plastic') {
-                let currentPlasticQty = parseInt(document.getElementById('plastic-qty').textContent, 10);
-                document.getElementById('plastic-qty').textContent = currentPlasticQty + 1;
-            } else if (maxClass === 'can') {
-                let currentCanQty = parseInt(document.getElementById('can-qty').textContent, 10);
-                document.getElementById('can-qty').textContent = currentCanQty + 1;
-            }
-            startVideoStream();
-        }
-
+    if (maxClass === 'plastic') {
+        let currentPlasticQty = parseInt(document.getElementById('plastic-qty').textContent, 10);
+        document.getElementById('plastic-qty').textContent = currentPlasticQty + 1;
+    } else if (maxClass === 'can') {
+        let currentCanQty = parseInt(document.getElementById('can-qty').textContent, 10);
+        document.getElementById('can-qty').textContent = currentCanQty + 1;
+        
+        // เรียก URL เมื่อพบ "can"
+        fetch('http://172.20.10.2/rotate')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                console.log('Rotate command sent successfully');
+            })
+            .catch(error => {
+                console.error('Error sending rotate command:', error);
+            });
+    }
+    startVideoStream();
+}
         // เริ่มกล้องอีกครั้ง
         function startVideoStream() {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
