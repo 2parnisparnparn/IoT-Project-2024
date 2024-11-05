@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
       box-sizing: border-box;
       font-family: 'Prompt', sans-serif;
     }
+
     body {
       background-color: #f0f0f0;
       display: flex;
@@ -20,6 +22,7 @@
       min-height: 100vh;
       color: #333;
     }
+
     .container {
       background-color: #ffffff;
       padding: 30px;
@@ -30,6 +33,7 @@
       overflow: hidden;
       position: relative;
     }
+
     h2 {
       text-align: center;
       margin-bottom: 10px;
@@ -37,22 +41,28 @@
       font-weight: 700;
       font-size: 28px;
     }
+
     .subtext {
       text-align: center;
       color: #777;
       margin-bottom: 20px;
     }
+
     .form-group {
       margin-bottom: 20px;
       position: relative;
     }
+
     label {
       display: block;
       margin-bottom: 8px;
       color: #666;
       font-weight: 500;
     }
-    input[type="text"], input[type="tel"], input[type="password"] {
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="password"] {
       width: 100%;
       padding: 15px;
       border: none;
@@ -62,25 +72,31 @@
       font-size: 16px;
       transition: all 0.3s ease;
     }
+
     input:focus {
       outline: none;
       box-shadow: 0 0 0 2px #046b3d;
     }
+
     input::placeholder {
       color: #999;
     }
+
     .flag-icon {
       position: absolute;
       left: 10px;
       top: 50%;
       transform: translateY(-50%);
     }
+
     input[type="tel"] {
       padding-left: 40px;
     }
+
     .password-group {
       position: relative;
     }
+
     .toggle-password {
       position: absolute;
       right: 10px;
@@ -89,11 +105,13 @@
       cursor: pointer;
       color: #666;
     }
+
     .error-message {
       color: red;
       font-size: 12px;
       margin-top: 5px;
     }
+
     button {
       width: 100%;
       padding: 15px;
@@ -107,60 +125,74 @@
       transition: background-color 0.3s ease;
       margin-top: 10px;
     }
+
     button:hover {
       background-color: #017d4e;
     }
+
     .login-link {
       margin-top: 20px;
       text-align: center;
       font-size: 14px;
     }
+
     .login-link a {
       color: #019b61;
       text-decoration: none;
       font-weight: 500;
     }
+
     .login-link a:hover {
       text-decoration: underline;
-      
     }
-    @keyframes slideLeft {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
     }
-    @keyframes slideRight {
-      from { transform: translateX(-100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+
+    .modal-content {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      position: relative;
     }
-    @keyframes slideOutLeft {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(-100%); opacity: 0; }
+
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #777;
     }
-    @keyframes slideOutRight {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(100%); opacity: 0; }
-    }
-    @media (max-width: 480px) {
-      .container {
-        padding: 20px;
-        border-radius: 0;
-        box-shadow: none;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-      body {
-        background-color: #ffffff;
-      }
+
+    .modal p {
+      margin: 0;
+      font-size: 16px;
+      color: #333;
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h2>สมัครสมาชิก</h2>
     <p class="subtext">สร้างบัญชีเพื่อดำเนินการต่อ!</p>
-    <form id="registrationForm" onsubmit="return validateForm()">
+    <form id="registrationForm">
       <div class="form-group">
         <label for="name">ชื่อ</label>
         <input type="text" id="name" name="name" placeholder="ชื่อ-นามสกุล" required>
@@ -189,6 +221,15 @@
     </div>
   </div>
 
+  <!-- Modal for success/failure message -->
+  <div class="modal" id="resultModal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal()">&times;</span>
+      <p id="modalMessage"></p>
+    </div>
+  </div>
+
+  <script src="../api.js"></script>
   <script>
     function togglePassword() {
       const passwordInput = document.getElementById('password');
@@ -196,10 +237,10 @@
 
       if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
-        passwordToggle.textContent = '∅'; // change to an eye-off emoji
+        passwordToggle.textContent = '∅';
       } else {
         passwordInput.type = 'password';
-        passwordToggle.textContent = '⦾'; // change back to an eye emoji
+        passwordToggle.textContent = '⦾';
       }
     }
 
@@ -209,40 +250,118 @@
 
       if (confirmPasswordInput.type === 'password') {
         confirmPasswordInput.type = 'text';
-        confirmPasswordToggle.textContent = '∅'; // change to an eye-off emoji
+        confirmPasswordToggle.textContent = '∅';
       } else {
         confirmPasswordInput.type = 'password';
-        confirmPasswordToggle.textContent = '⦾'; // change back to an eye emoji
+        confirmPasswordToggle.textContent = '⦾';
       }
     }
 
-    function validateForm() {
-      const phoneInput = document.getElementById('phone');
-      const phoneError = document.getElementById('phoneError');
-      const passwordInput = document.getElementById('password');
-      const confirmPasswordInput = document.getElementById('confirmPassword');
-      const confirmPasswordError = document.getElementById('confirmPasswordError');
-
-      // Reset error messages
-      phoneError.textContent = '';
-      confirmPasswordError.textContent = '';
-
-      // Validate phone number
-      if (phoneInput.value.length !== 10) {
-        phoneError.textContent = 'Phone number must be 10 digits long.';
-        return false; // Prevent form submission
-      }
-
-      // Validate password match
-      if (passwordInput.value !== confirmPasswordInput.value) {
-        confirmPasswordError.textContent = 'Passwords do not match.';
-        return false; // Prevent form submission
-      }
-
-      // If everything is valid, redirect to index.html
-      window.location.href = 'index.html';
-      return false; // Prevent default form submission
+    function openModal(message) {
+      const modal = document.getElementById('resultModal');
+      const modalMessage = document.getElementById('modalMessage');
+      modalMessage.textContent = message;
+      modal.style.display = 'flex';
     }
+    function validatePhoneNumberLength(phone) {
+    if (phone.length !== 10) {
+        document.getElementById('phoneError').textContent = 'Phone number must be exactly 10 digits long.';
+        return false; // Validation failed
+    }
+    document.getElementById('phoneError').textContent = ''; // Clear any existing error message
+    return true; // Validation passed
+}
+
+
+    function closeModal() {
+      document.getElementById('resultModal').style.display = 'none';
+    }
+    async function handleFormSubmit(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (!validatePhoneNumberLength(phone)) {
+        return; // Exit if validation fails
+    }
+    // Check if passwords match
+    if (password !== confirmPassword) {
+        document.getElementById('confirmPasswordError').textContent = 'Passwords do not match.';
+        return;
+    }
+
+    // Clear any existing error message
+    document.getElementById('confirmPasswordError').textContent = '';
+
+    // Check if user already exists by phone number
+    const userExists = await checkUserExists(phone);
+
+    if (userExists !== 404) {
+        openModal('This phone number is already registered.');
+        return;
+    }
+
+    // Prepare user data for registration
+    const userData = {
+        phone_number: phone,
+        password: password,
+        credit: 0,
+        full_name: name
+    };
+
+    // Attempt to create user
+    const result = await createUser(userData);
+    console.log('API response:', result);
+
+    if (result.success) {
+        console.log('User created successfully:', result);
+        openModal('User created successfully!');
+        setTimeout(() => {
+            window.location.href = 'index.html'; // Redirect to index.html on success
+        }, 2000);
+    } else {
+        openModal(result.message || 'Failed to create user. Please try again.');
+    }
+}
+
+// Attach the event listener
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('yourFormId'); // Replace with your actual form ID
+    form.addEventListener('submit', handleFormSubmit);
+});
+
+
+
+// Function to check if the user exists by phone number
+
+async function checkUserExists(phoneNumber) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/${phoneNumber}`);
+        
+        // Check if the response status is 404
+        if (response.status === 404) {
+            return 404; // User does not exist
+        } else if (response.ok) {
+            // If the user exists, you might want to return a user object or some data
+            return await response.json(); // Assuming the user data is returned in JSON format
+        } else {
+            // Handle other status codes (optional)
+            throw new Error(`Unexpected response: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error checking user:', error);
+        throw new Error('Connection error');
+    }
+}
+
+
+
+
+    document.getElementById('registrationForm').addEventListener('submit', handleFormSubmit);
   </script>
 </body>
+
 </html>

@@ -12,6 +12,38 @@ async function checkUserExists(phoneNumber) {
     }
 }
 
+
+async function createUser(userData, createUserApiUrl = `${API_BASE_URL}/create-user`) {
+    try {
+        console.log(createUserApiUrl);
+
+        const response = await fetch(createUserApiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
+
+        // Handle different response statuses
+        if (response.status === 204) {
+            return { success: true }; // User created successfully, no content to return
+        } else if (!response.ok) {
+            // Throw an error for any other non-success status
+            throw new Error(`Failed to create user: ${response.statusText}`);
+        }
+
+        // If response is 200, parse the JSON result
+        const result = await response.json();
+        return result;
+
+    } catch (error) {
+        console.error('Error creating user: ', error);
+        throw new Error('Failed to create user');
+    }
+}
+
+
 // Function to fetch bottle credit
 async function fetchBottleCredit(bottleType) {
     try {
