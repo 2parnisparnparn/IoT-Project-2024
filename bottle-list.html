@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายการขวด</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>
     <script src="api.js"></script>
     <style>
+        /* Your existing styles remain unchanged */
         body {
             font-family: 'Prompt', sans-serif;
             background-color: #121212;
@@ -110,19 +109,18 @@
         .right-box {
             text-align: center;
             font-size: 1.8vw;
-            padding: 2vw; /* เพิ่ม padding เพื่อให้มีช่องว่างมากขึ้น */
+            padding: 2vw;
             background-color: #424242;
             border-radius: 10px;
             color: #f0f0f0;
             height: 100%;
             margin-top: 1vw;
             display: flex;
-            flex-direction: column; /* ให้บล็อกเป็นแนวตั้ง */
-            justify-content: center; /* จัดแนวกลางในแนวตั้ง */
-            align-items: center; /* จัดให้กลางแนวนอน */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Add keyframe animation for the bottle */
         @keyframes bounce {
             0%, 100% {
                 transform: translateY(0);
@@ -132,13 +130,12 @@
             }
         }
 
-        /* Apply animation to the bottle image */
         .bottle-animation {
-            width: 40%; /* ปรับขนาดรูปภาพให้ใหญ่ขึ้น */
+            width: 40%;
             height: auto;
             animation: bounce 1s infinite;
-            margin: 0 auto; /* ให้อยู่กลางแนวนอน */
-            margin-bottom: 1vw; /* เพิ่มช่องว่างด้านล่างระหว่างรูปกับข้อความ */
+            margin: 0 auto;
+            margin-bottom: 1vw;
         }
 
         .submit-btn {
@@ -185,7 +182,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="column">
@@ -220,8 +216,8 @@
         
             <div class="box right-box">
                 <div>
-                <img class="bottle-animation" src="https://cdn-icons-png.flaticon.com/512/3520/3520812.png" alt="bouncing bottle">
-            </div>
+                    <img class="bottle-animation" src="https://cdn-icons-png.flaticon.com/512/3520/3520812.png" alt="bouncing bottle">
+                </div>
                 <div>กรุณาใส่ขวด</div>
             </div>
         </div>
@@ -234,98 +230,127 @@
         const video = document.getElementById('video');
         const collectedPredictions = [];
         const maxPredictions = 10;
+        let isVideoActive = false;
+        let lastDistance = null;
+        let wasLessThan20 = false;
         
+        // Start distance polling when page loads
+        pollDistance();
 
-        // โหลดข้อมูลจาก config.json
-        fetch('config.json')
-            .then(response => response.json())
-            .then(config => {
-                const apiKey = config.roboflow_key;
-                const modelName = config.model;
-                const modelVersion = config.version;
+        function pollDistance() {
+            fetch('http://172.20.10.13/distance')
+                .then(response => response.text())
+                .then(distance => {
+                    const distanceValue = parseInt(distance);
+                    console.log('Distance:', distanceValue); // For debugging
 
-                // เรียกใช้กล้องและโหลดโมเดล Roboflow
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                    .then(stream => {
-                        video.srcObject = stream;
-                        return video.play();
-                    })
-                    .then(() => roboflow.auth({ publishable_key: apiKey })
-                        .load({ model: modelName, version: modelVersion }))
-                    .then(m => {
-                        model = m;
-                        detectFrame();
-                    });
-            })
-            .catch(error => console.error('Error loading config:', error));
+                    if (!wasLessThan20 && distanceValue < 20) {
+                        // First condition: distance less than 20cm
+                        wasLessThan20 = true;
+                        console.log('First condition met: < 20cm');
+                    } else if (wasLessThan20 && distanceValue > 100 && !isVideoActive) {
+                        // Second condition: distance greater than 100cm right after being less than 20cm
+                        console.log('Second condition met: > 100cm, activating camera');
+                        wasLessThan20 = false; // Reset for next detection
+                        
+                        // Activate camera and servo
+                        fetch('http://172.20.10.13/rotate-servo1')
+                            .then(() => {
+                                console.log('Servo activated');
+                                initializeCamera();
+                            })
+                            .catch(error => console.error('Error activating servo:', error));
+                    } else if (distanceValue >= 20) {
+                        // Reset if distance goes above 20 without triggering
+                        wasLessThan20 = false;
+                    }
 
-        // ฟังก์ชันตรวจจับวัตถุในเฟรม
+                    lastDistance = distanceValue;
+                })
+                .catch(error => console.error('Error reading distance:', error))
+                .finally(() => {
+                    // Poll again after 200ms for more responsive detection
+                    setTimeout(pollDistance, 200);
+                });
+        }
+
+        function initializeCamera() {
+            isVideoActive = true;
+            // Load config and initialize camera
+            fetch('config.json')
+                .then(response => response.json())
+                .then(config => {
+                    const apiKey = config.roboflow_key;
+                    const modelName = config.model;
+                    const modelVersion = config.version;
+
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                        .then(stream => {
+                            video.srcObject = stream;
+                            return video.play();
+                        })
+                        .then(() => roboflow.auth({ publishable_key: apiKey })
+                            .load({ model: modelName, version: modelVersion }))
+                        .then(m => {
+                            model = m;
+                            detectFrame();
+                        });
+                })
+                .catch(error => console.error('Error loading config:', error));
+        }
+
         function detectFrame() {
+            if (!isVideoActive) return;
+            
             model.detect(video).then(predictions => {
                 const filteredPredictions = predictions.filter(prediction => prediction.confidence >= 0.5);
 
-                // เก็บผลลัพธ์การตรวจจับ
                 filteredPredictions.forEach(prediction => {
                     if (collectedPredictions.length < maxPredictions) {
                         collectedPredictions.push(prediction.class);
                     }
                 });
 
-                // เมื่อเก็บครบ 10 ครั้ง หยุดกล้องและประมวลผลผลลัพธ์
                 if (collectedPredictions.length >= maxPredictions) {
                     stopVideoStream();
                     processResults();
                 }
         
-                requestAnimationFrame(detectFrame);
+                if (isVideoActive) {
+                    requestAnimationFrame(detectFrame);
+                }
             });
         }
 
-        // หยุดกล้อง
         function stopVideoStream() {
+            isVideoActive = false;
             const stream = video.srcObject;
-            const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+            video.srcObject = null;
         }
 
-        // ประมวลผลผลลัพธ์การตรวจจับ
-function processResults() {
-    if (collectedPredictions.length === 0) {
-        console.log("No object detected.");
-        return;
-    }
-
-    const counts = collectedPredictions.reduce((acc, className) => {
-        acc[className] = (acc[className] || 0) + 1;
-        return acc;
-    }, {});
-
-    const maxClass = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-    const maxCount = counts[maxClass];
-
-    // เรียกใช้งาน URL ที่กำหนดเมื่อมีการตรวจจับวัตถุ
-    fetch("http://172.20.10.2/rotate")
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+        function processResults() {
+            if (collectedPredictions.length === 0) {
+                console.log("No object detected.");
+                return;
             }
-            return response.text(); // หรือ response.json() ขึ้นอยู่กับว่าต้องการข้อมูลประเภทไหน
-        })
-        .then(data => {
-            console.log('Success:', data); // แสดงข้อมูลที่ได้รับจากเซิร์ฟเวอร์
-        })
-        .catch(error => {
-            console.error('Error calling rotation API:', error);
-        });
 
-    updateResult(maxClass, maxCount);
+            const counts = collectedPredictions.reduce((acc, className) => {
+                acc[className] = (acc[className] || 0) + 1;
+                return acc;
+            }, {});
 
-    // ล้างข้อมูลที่เก็บไว้
-    collectedPredictions.length = 0;
-}
+            const maxClass = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+            const maxCount = counts[maxClass];
 
-        // อัปเดตผลลัพธ์บน UI
-        function updateResult(maxClass, maxCount) {
+            updateResult(maxClass, maxCount);
+            collectedPredictions.length = 0;
+        }
+
+        async function updateResult(maxClass, maxCount) {
     if (maxClass === 'plastic') {
         let currentPlasticQty = parseInt(document.getElementById('plastic-qty').textContent, 10);
         document.getElementById('plastic-qty').textContent = currentPlasticQty + 1;
@@ -333,32 +358,26 @@ function processResults() {
         let currentCanQty = parseInt(document.getElementById('can-qty').textContent, 10);
         document.getElementById('can-qty').textContent = currentCanQty + 1;
         
-        // เรียก URL เมื่อพบ "can"
-        fetch('http://172.20.10.2/rotate')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                console.log('Rotate command sent successfully');
+        // Call the second servo when a can is detected
+        fetch('http://172.20.10.13/rotate-servo2')
+            .then(() => {
+                console.log('Servo 2 activated for can');
             })
-            .catch(error => {
-                console.error('Error sending rotate command:', error);
-            });
+            .catch(error => console.error('Error activating servo 2:', error));
     }
-    startVideoStream();
-}
-        // เริ่มกล้องอีกครั้ง
-        function startVideoStream() {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                .then(stream => {
-                    video.srcObject = stream;
-                    return video.play();
-                })
-                .then(() => {
-                    detectFrame();
-                });
-        }
 
+    // Wait for 5 seconds
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    
+    // Call servo3 after 5 seconds
+    fetch('http://172.20.10.13/rotate-servo3')
+        .then(() => {
+            console.log('Servo 3 activated after delay');
+        })
+        .catch(error => console.error('Error activating servo 3:', error));
+}
+
+        // Existing credit and data sending functions remain unchanged
         const urlParams = new URLSearchParams(window.location.search);
         const phoneNumber = urlParams.get('phone-number');
         document.getElementById('phone-number').textContent = phoneNumber;
@@ -366,10 +385,10 @@ function processResults() {
 
         async function updateCredit(phoneNumber) {
             try {
-                const credit = await getCradit(phoneNumber); // รอการดึงค่า credit จากฟังก์ชัน getCradit
-                document.getElementById('credit').textContent = `${credit}`; // อัปเดตค่า credit ในหน้าเว็บ
+                const credit = await getCradit(phoneNumber);
+                document.getElementById('credit').textContent = `${credit}`;
             } catch (error) {
-                document.getElementById('credit').textContent = 'ไม่สามารถดึงข้อมูลเครดิตได้'; // แสดงข้อความเมื่อเกิดข้อผิดพลาด
+                document.getElementById('credit').textContent = 'ไม่สามารถดึงข้อมูลเครดิตได้';
                 console.error('Error fetching credit:', error);
             }
         }
@@ -382,8 +401,6 @@ function processResults() {
             const url = `suckseed.html?plastic=${plasticQty}&can=${canQty}&phone-number=${phoneNumber}&credit=${credit}`;
             window.location.href = url;
         }
-
     </script>
 </body>
-
 </html>
