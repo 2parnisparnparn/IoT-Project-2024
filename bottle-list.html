@@ -233,11 +233,21 @@
         let isVideoActive = false;
         let lastDistance = null;
         let wasLessThan20 = false;
-        
+
+
         // Start distance polling when page loads
         pollDistance();
 
         function pollDistance() {
+
+              // เรียก setup-servo1 เมื่อหน้าเว็บโหลดครั้งแรก
+        fetch('http://172.20.10.13/setup-servo1')
+            .then(() => {
+                console.log('Servo 1 setup completed');
+            })
+            .catch(error => console.error('Error setting up servo 1:', error));
+        
+
             fetch('http://172.20.10.13/distance')
                 .then(response => response.text())
                 .then(distance => {
@@ -248,7 +258,7 @@
                         // First condition: distance less than 20cm
                         wasLessThan20 = true;
                         console.log('First condition met: < 20cm');
-                    } else if (wasLessThan20 && distanceValue > 100 && !isVideoActive) {
+                    } else if (wasLessThan20 && distanceValue > 40 && !isVideoActive) {
                         // Second condition: distance greater than 100cm right after being less than 20cm
                         console.log('Second condition met: > 100cm, activating camera');
                         wasLessThan20 = false; // Reset for next detection
