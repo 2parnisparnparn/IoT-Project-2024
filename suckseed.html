@@ -323,9 +323,11 @@
     
             const totalPlasticCredit = plasticCount * plasticBottle.carbon_credit;
             const totalCanCredit = canCount * canBottle.carbon_credit;
+            const CurrentCredited = totalPlasticCredit + totalCanCredit;
             const totalCredit = totalPlasticCredit + totalCanCredit + userCredit; // Include user credit here
             const totalItemCount = plasticCount + canCount;
     
+            document.getElementById("currentCreditDisplay").innerText = CurrentCredited + "   คะแนน";
             document.getElementById("petCountResult").innerText = plasticCount;
             document.getElementById("canCountResult").innerText = canCount;
             document.getElementById("PET_CREDIT").innerText = plasticBottle.carbon_credit.toFixed(2);
