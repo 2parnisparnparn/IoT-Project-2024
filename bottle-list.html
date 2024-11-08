@@ -9,7 +9,6 @@
     <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>
     <script src="api.js"></script>
     <style>
-        /* Your existing styles remain unchanged */
         body {
             font-family: 'Prompt', sans-serif;
             background-color: #121212;
@@ -156,6 +155,45 @@
             background-color: #58d0a2;
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #1f1f1f;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            color: #f0f0f0;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        .modal-button {
+            background-color: #0b9d65;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Prompt', sans-serif;
+            margin-top: 15px;
+        }
+
+        .modal-button:hover {
+            background-color: #58d0a2;
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -179,6 +217,10 @@
             .item img {
                 width: 30%;
             }
+        }
+
+        video {
+            display: none;
         }
     </style>
 </head>
@@ -205,7 +247,7 @@
             <div class="box-name">
                 <div class="box-name-content">
                     <div>
-                        หมายเลขโทรศัพท์ <b id="phone-number"> </b> <br>
+                        หมายเลขโทรศัพท์ <b id="phone-number"></b> <br>
                         คุณมีเครดิต <b id="credit"> คะแนน </b> แล้วนะ
                     </div>
                     <div>
@@ -223,194 +265,287 @@
         </div>
     </div>
 
+    <!-- Modal for No Detection -->
+    <div id="noDetectionModal" class="modal">
+        <div class="modal-content">
+            <h2>แจ้งเตือน</h2>
+            <p>กรุณาใส่ขวดใหม่อีกครั้ง</p>
+            <button class="modal-button" onclick="closeNoDetectionModal()">ตกลง</button>
+        </div>
+    </div>
+
+    <!-- Modal for Water Level -->
+    <div id="waterLevelModal" class="modal">
+        <div class="modal-content">
+            <h2>แจ้งเตือน</h2>
+            <p>กรุณาเทน้ำออกให้หมด</p>
+            <button class="modal-button" onclick="closeWaterLevelModal()">ตกลง</button>
+        </div>
+    </div>
+
     <video id="video" autoplay muted playsinline></video>
 
     <script>
         let model;
-        const video = document.getElementById('video');
-        const collectedPredictions = [];
-        const maxPredictions = 10;
-        let isVideoActive = false;
-        let lastDistance = null;
-        let wasLessThan20 = false;
+const video = document.getElementById('video');
+const collectedPredictions = [];
+const maxPredictions = 10;
+let isVideoActive = false;
+let lastDistance = null;
+let wasLessThan20 = false;
+let noDetectionTimer = null;
+let isWaitingForWaterRemoval = false;
+let isWaitingForNewBottle = false;
 
+openDoor();
+pollDistance();
 
-        // Start distance polling when page loads
-        pollDistance();
-
-        function pollDistance() {
-
-              // เรียก setup-servo1 เมื่อหน้าเว็บโหลดครั้งแรก
-        fetch('http://172.20.10.13/setup-servo1')
-            .then(() => {
-                console.log('Servo 1 setup completed');
-            })
-            .catch(error => console.error('Error setting up servo 1:', error));
-        
-
-            fetch('http://172.20.10.13/distance')
-                .then(response => response.text())
-                .then(distance => {
-                    const distanceValue = parseInt(distance);
-                    console.log('Distance:', distanceValue); // For debugging
-
-                    if (!wasLessThan20 && distanceValue < 20) {
-                        // First condition: distance less than 20cm
-                        wasLessThan20 = true;
-                        console.log('First condition met: < 20cm');
-                    } else if (wasLessThan20 && distanceValue > 40 && !isVideoActive) {
-                        // Second condition: distance greater than 100cm right after being less than 20cm
-                        console.log('Second condition met: > 100cm, activating camera');
-                        wasLessThan20 = false; // Reset for next detection
-                        
-                        // Activate camera and servo
-                        fetch('http://172.20.10.13/rotate-servo1')
-                            .then(() => {
-                                console.log('Servo activated');
-                                initializeCamera();
-                            })
-                            .catch(error => console.error('Error activating servo:', error));
-                    } else if (distanceValue >= 20) {
-                        // Reset if distance goes above 20 without triggering
-                        wasLessThan20 = false;
-                    }
-
-                    lastDistance = distanceValue;
-                })
-                .catch(error => console.error('Error reading distance:', error))
-                .finally(() => {
-                    // Poll again after 200ms for more responsive detection
-                    setTimeout(pollDistance, 200);
-                });
-        }
-
-        function initializeCamera() {
-            isVideoActive = true;
-            // Load config and initialize camera
-            fetch('config.json')
-                .then(response => response.json())
-                .then(config => {
-                    const apiKey = config.roboflow_key;
-                    const modelName = config.model;
-                    const modelVersion = config.version;
-
-                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                        .then(stream => {
-                            video.srcObject = stream;
-                            return video.play();
-                        })
-                        .then(() => roboflow.auth({ publishable_key: apiKey })
-                            .load({ model: modelName, version: modelVersion }))
-                        .then(m => {
-                            model = m;
-                            detectFrame();
-                        });
-                })
-                .catch(error => console.error('Error loading config:', error));
-        }
-
-        function detectFrame() {
-            if (!isVideoActive) return;
-            
-            model.detect(video).then(predictions => {
-                const filteredPredictions = predictions.filter(prediction => prediction.confidence >= 0.5);
-
-                filteredPredictions.forEach(prediction => {
-                    if (collectedPredictions.length < maxPredictions) {
-                        collectedPredictions.push(prediction.class);
-                    }
-                });
-
-                if (collectedPredictions.length >= maxPredictions) {
-                    stopVideoStream();
-                    processResults();
-                }
-        
-                if (isVideoActive) {
-                    requestAnimationFrame(detectFrame);
-                }
-            });
-        }
-
-        function stopVideoStream() {
-            isVideoActive = false;
-            const stream = video.srcObject;
-            if (stream) {
-                const tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
-            }
-            video.srcObject = null;
-        }
-
-        function processResults() {
-            if (collectedPredictions.length === 0) {
-                console.log("No object detected.");
-                return;
-            }
-
-            const counts = collectedPredictions.reduce((acc, className) => {
-                acc[className] = (acc[className] || 0) + 1;
-                return acc;
-            }, {});
-
-            const maxClass = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-            const maxCount = counts[maxClass];
-
-            updateResult(maxClass, maxCount);
-            collectedPredictions.length = 0;
-        }
-
-        async function updateResult(maxClass, maxCount) {
-    if (maxClass === 'plastic') {
-        let currentPlasticQty = parseInt(document.getElementById('plastic-qty').textContent, 10);
-        document.getElementById('plastic-qty').textContent = currentPlasticQty + 1;
-    } else if (maxClass === 'can') {
-        let currentCanQty = parseInt(document.getElementById('can-qty').textContent, 10);
-        document.getElementById('can-qty').textContent = currentCanQty + 1;
-        
-        // Call the second servo when a can is detected
-        fetch('http://172.20.10.13/rotate-servo2')
-            .then(() => {
-                console.log('Servo 2 activated for can');
-            })
-            .catch(error => console.error('Error activating servo 2:', error));
-    }
-
-    // Wait for 5 seconds
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    
-    // Call servo3 after 5 seconds
-    fetch('http://172.20.10.13/rotate-servo3')
+function openDoor() {
+    fetch('http://172.20.10.13/setup-servo1')
         .then(() => {
-            console.log('Servo 3 activated after delay');
+            console.log('Servo 1 setup completed');
         })
-        .catch(error => console.error('Error activating servo 3:', error));
+        .catch(error => console.error('Error setting up servo 1:', error));
 }
 
-        // Existing credit and data sending functions remain unchanged
-        const urlParams = new URLSearchParams(window.location.search);
-        const phoneNumber = urlParams.get('phone-number');
-        document.getElementById('phone-number').textContent = phoneNumber;
-        updateCredit(phoneNumber);
+async function checkWaterLevel() {
+    try {
+        const response = await fetch('http://172.20.10.13/water-level');
+        const data = await response.text();
+        console.log('Water level response:', data);
+        
+        const hasWater = data.trim().toLowerCase() === 'yes';
+        console.log('Has water:', hasWater);
+        return hasWater;
+    } catch (error) {
+        console.error('Error checking water level:', error);
+        return false;
+    }
+}
 
-        async function updateCredit(phoneNumber) {
-            try {
-                const credit = await getCradit(phoneNumber);
-                document.getElementById('credit').textContent = `${credit}`;
-            } catch (error) {
-                document.getElementById('credit').textContent = 'ไม่สามารถดึงข้อมูลเครดิตได้';
-                console.error('Error fetching credit:', error);
+async function pollDistance() {
+    try {
+        const response = await fetch('http://172.20.10.13/distance');
+        const distance = await response.text();
+        const distanceValue = parseInt(distance);
+        console.log('Distance:', distanceValue);
+
+        // ถ้ากำลังรอให้เอาขวดที่มีน้ำออก หรือ รอใส่ขวดใหม่ ให้ข้ามการเช็คระยะทาง
+        if (isWaitingForWaterRemoval || isWaitingForNewBottle) {
+            console.log('Waiting for user action...');
+            setTimeout(pollDistance, 200);
+            return;
+        }
+
+        if (!wasLessThan20 && distanceValue < 25) {
+            wasLessThan20 = true;
+            console.log('First condition met: < 25cm');
+        } else if (wasLessThan20 && distanceValue > 40 && !isVideoActive) {
+            console.log('Second condition met: > 40cm');
+            wasLessThan20 = false;
+            
+            // Check water level before activating camera
+            const hasWater = await checkWaterLevel();
+            if (hasWater) {
+                console.log('Water detected, showing modal');
+                document.getElementById('waterLevelModal').style.display = 'block';
+                isWaitingForWaterRemoval = true;
+                wasLessThan20 = false;
+                setTimeout(pollDistance, 200);
+                return;
             }
+            
+            try {
+                await fetch('http://172.20.10.13/rotate-servo1');
+                console.log('Servo activated');
+                initializeCamera();
+            } catch (error) {
+                console.error('Error activating servo:', error);
+            }
+        } else if (distanceValue >= 20) {
+            wasLessThan20 = false;
         }
 
-        function sentData() {
-            const plasticQty = document.getElementById('plastic-qty').textContent;
-            const canQty = document.getElementById('can-qty').textContent;
-            const phoneNumber = document.getElementById('phone-number').textContent.trim();
-            const credit = document.getElementById('credit').textContent;
-            const url = `suckseed.html?plastic=${plasticQty}&can=${canQty}&phone-number=${phoneNumber}&credit=${credit}`;
-            window.location.href = url;
+        lastDistance = distanceValue;
+    } catch (error) {
+        console.error('Error reading distance:', error);
+    }
+    
+    setTimeout(pollDistance, 200);
+}
+
+function initializeCamera() {
+    isVideoActive = true;
+    
+    if (noDetectionTimer) {
+        clearTimeout(noDetectionTimer);
+    }
+    
+    noDetectionTimer = setTimeout(() => {
+        if (collectedPredictions.length === 0) {
+            console.log('No object detected within 10 seconds');
+            stopVideoStream();
+            isWaitingForNewBottle = true;
+            document.getElementById('noDetectionModal').style.display = 'block';
         }
+    }, 10000);
+
+    fetch('config.json')
+        .then(response => response.json())
+        .then(config => {
+            const apiKey = config.roboflow_key;
+            const modelName = config.model;
+            const modelVersion = config.version;
+
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(stream => {
+                    video.srcObject = stream;
+                    return video.play();
+                })
+                .then(() => roboflow.auth({ publishable_key: apiKey })
+                    .load({ model: modelName, version: modelVersion }))
+                .then(m => {
+                    model = m;
+                    detectFrame();
+                });
+        })
+        .catch(error => console.error('Error loading config:', error));
+}
+
+function detectFrame() {
+    if (!isVideoActive) return;
+    
+    model.detect(video).then(predictions => {
+        const filteredPredictions = predictions.filter(prediction => prediction.confidence >= 0.5);
+
+        filteredPredictions.forEach(prediction => {
+            if (collectedPredictions.length < maxPredictions) {
+                collectedPredictions.push(prediction.class);
+            }
+        });
+
+        if (collectedPredictions.length >= maxPredictions) {
+            stopVideoStream();
+            processResults();
+        }
+
+        if (isVideoActive) {
+            requestAnimationFrame(detectFrame);
+        }
+    });
+}
+
+function stopVideoStream() {
+    isVideoActive = false;
+    if (noDetectionTimer) {
+        clearTimeout(noDetectionTimer);
+        noDetectionTimer = null;
+    }
+    const stream = video.srcObject;
+    if (stream) {
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+    }
+    video.srcObject = null;
+}
+
+function processResults() {
+    if (collectedPredictions.length === 0) {
+        console.log("No object detected.");
+        return;
+    }
+
+    const counts = collectedPredictions.reduce((acc, className) => {
+        acc[className] = (acc[className] || 0) + 1;
+        return acc;
+    }, {});
+
+    const maxClass = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    const maxCount = counts[maxClass];
+
+    updateResult(maxClass, maxCount);
+    collectedPredictions.length = 0;
+}
+
+async function updateResult(maxClass, maxCount) {
+    try {
+        if (maxClass === 'plastic') {
+            let currentPlasticQty = parseInt(document.getElementById('plastic-qty').textContent, 10);
+            document.getElementById('plastic-qty').textContent = currentPlasticQty + 1;
+        } else if (maxClass === 'can') {
+            let currentCanQty = parseInt(document.getElementById('can-qty').textContent, 10);
+            document.getElementById('can-qty').textContent = currentCanQty + 1;
+            
+            await fetch('http://172.20.10.13/rotate-servo3');
+            console.log('Servo 3 activated for can');
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+
+        await fetch('http://172.20.10.13/rotate-servo2');
+        console.log('Servo 2 activated');
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        if (maxClass === 'can') {
+            await fetch('http://172.20.10.13/success-servo3');
+            console.log('Servo 3 returned to initial position');
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+
+        await fetch('http://172.20.10.13/setup-servo1');
+        console.log('Door opened for next bottle');
+
+    } catch (error) {
+        console.error('Error in servo sequence:', error);
+        try {
+            await fetch('http://172.20.10.13/setup-servo1');
+        } catch (e) {
+            console.error('Failed to open door after error:', e);
+        }
+    }
+}
+
+function closeNoDetectionModal() {
+    document.getElementById('noDetectionModal').style.display = 'none';
+    isWaitingForNewBottle = false;
+    wasLessThan20 = false;
+    openDoor();
+}
+
+function closeWaterLevelModal() {
+    document.getElementById('waterLevelModal').style.display = 'none';
+    isWaitingForWaterRemoval = false;
+    wasLessThan20 = false;
+    openDoor();
+}
+
+// Credit and data sending functions
+const urlParams = new URLSearchParams(window.location.search);
+const phoneNumber = urlParams.get('phone-number');
+document.getElementById('phone-number').textContent = phoneNumber;
+updateCredit(phoneNumber);
+
+async function updateCredit(phoneNumber) {
+    try {
+        const credit = await getCradit(phoneNumber);
+        document.getElementById('credit').textContent = `${credit}`;
+    } catch (error) {
+        document.getElementById('credit').textContent = 'ไม่สามารถดึงข้อมูลเครดิตได้';
+        console.error('Error fetching credit:', error);
+    }
+}
+
+function sentData() {
+    const plasticQty = document.getElementById('plastic-qty').textContent;
+    const canQty = document.getElementById('can-qty').textContent;
+    const phoneNumber = document.getElementById('phone-number').textContent.trim();
+    const credit = document.getElementById('credit').textContent;
+    const url = `suckseed.html?plastic=${plasticQty}&can=${canQty}&phone-number=${phoneNumber}&credit=${credit}`;
+    window.location.href = url;
+}
     </script>
-</body>
-</html>
+    </body>
+
+    </html>
