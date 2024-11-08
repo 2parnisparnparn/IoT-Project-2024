@@ -418,11 +418,18 @@ function detectFrame() {
     model.detect(video).then(predictions => {
         const filteredPredictions = predictions.filter(prediction => prediction.confidence >= 0.5);
 
+        // เพิ่มการแสดงผลการตรวจจับแต่ละเฟรม
+        console.log('Current Frame Detections:');
         filteredPredictions.forEach(prediction => {
+            console.log(`Class: ${prediction.class}, Confidence: ${prediction.confidence.toFixed(2)}`);
             if (collectedPredictions.length < maxPredictions) {
                 collectedPredictions.push(prediction.class);
             }
         });
+
+        // แสดงจำนวนการตรวจจับที่สะสมไว้
+        console.log('Collected Predictions:', collectedPredictions);
+        console.log('Total collected:', collectedPredictions.length);
 
         if (collectedPredictions.length >= maxPredictions) {
             stopVideoStream();
@@ -433,6 +440,34 @@ function detectFrame() {
             requestAnimationFrame(detectFrame);
         }
     });
+}
+
+function processResults() {
+    if (collectedPredictions.length === 0) {
+        console.log("No object detected.");
+        return;
+    }
+
+    const counts = collectedPredictions.reduce((acc, className) => {
+        acc[className] = (acc[className] || 0) + 1;
+        return acc;
+    }, {});
+
+    // แสดงผลสรุปการตรวจจับ
+    console.log('Detection Summary:');
+    console.log('Total predictions collected:', collectedPredictions.length);
+    console.log('Count by class:', counts);
+
+    const maxClass = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    const maxCount = counts[maxClass];
+
+    console.log('Final Result:');
+    console.log('Most detected class:', maxClass);
+    console.log('Detection count:', maxCount);
+    console.log('Confidence level:', (maxCount / maxPredictions * 100).toFixed(2) + '%');
+
+    updateResult(maxClass, maxCount);
+    collectedPredictions.length = 0;
 }
 
 function stopVideoStream() {
@@ -449,23 +484,6 @@ function stopVideoStream() {
     video.srcObject = null;
 }
 
-function processResults() {
-    if (collectedPredictions.length === 0) {
-        console.log("No object detected.");
-        return;
-    }
-
-    const counts = collectedPredictions.reduce((acc, className) => {
-        acc[className] = (acc[className] || 0) + 1;
-        return acc;
-    }, {});
-
-    const maxClass = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-    const maxCount = counts[maxClass];
-
-    updateResult(maxClass, maxCount);
-    collectedPredictions.length = 0;
-}
 
 async function updateResult(maxClass, maxCount) {
     try {
