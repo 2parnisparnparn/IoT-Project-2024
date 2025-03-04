@@ -194,6 +194,43 @@
             background-color: #58d0a2;
         }
 
+        /* วิดีโอจากกล้อง */
+        video {
+            display: none; /* ซ่อนไว้ตอนเริ่มต้น */
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        
+        /* คอนเทนเนอร์สำหรับวิดีโอ */
+        .video-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* ข้อความแสดงสถานะการตรวจจับ */
+        .detection-status {
+            margin-top: 1vw;
+            font-size: 1.2vw;
+            color: #66bb6a;
+            text-align: center;
+        }
+        
+        /* เพิ่มคลาสนี้เมื่อแสดงวิดีโอ */
+        .show-video {
+            display: block !important;
+        }
+        
+        /* ซ่อนเนื้อหาเมื่อแสดงวิดีโอ */
+        .hide-content {
+            display: none !important;
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -217,10 +254,10 @@
             .item img {
                 width: 30%;
             }
-        }
-
-        video {
-            display: none;
+            
+            .detection-status {
+                font-size: 3vw;
+            }
         }
     </style>
 </head>
@@ -257,10 +294,19 @@
             </div>
         
             <div class="box right-box">
-                <div>
-                    <img class="bottle-animation" src="https://cdn-icons-png.flaticon.com/512/3520/3520812.png" alt="bouncing bottle">
+                <!-- เพิ่มคอนเทนเนอร์สำหรับวิดีโอ -->
+                <div class="video-container">
+                    <video id="video" autoplay muted playsinline></video>
+                    <div class="detection-status" id="detection-status"></div>
                 </div>
-                <div>กรุณาใส่ขวด</div>
+                
+                <!-- เนื้อหาเดิมที่จะซ่อนเมื่อแสดงวิดีโอ -->
+                <div class="original-content" id="original-content">
+                    <div>
+                        <img class="bottle-animation" src="https://cdn-icons-png.flaticon.com/512/3520/3520812.png" alt="bouncing bottle">
+                    </div>
+                    <div>กรุณาใส่ขวด</div>
+                </div>
             </div>
         </div>
     </div>
@@ -295,8 +341,6 @@
         </div>
     </div>
 
-    <video id="video" autoplay muted playsinline></video>
-
     <script>
         let model;
 const video = document.getElementById('video');
@@ -308,6 +352,11 @@ let wasLessThan20 = false;
 let noDetectionTimer = null;
 let isWaitingForWaterRemoval = false;
 let isWaitingForNewBottle = false;
+
+// เพิ่มตัวแปรใหม่สำหรับจัดการการแสดงผลวิดีโอ
+const videoElement = document.getElementById('video');
+const originalContent = document.getElementById('original-content');
+const detectionStatus = document.getElementById('detection-status');
 
 openDoor();
 pollDistance();
@@ -390,8 +439,12 @@ async function pollDistance() {
     
     setTimeout(pollDistance, 200);
 }
+
 function initializeCamera() {
     isVideoActive = true;
+    
+    // แสดงวิดีโอและซ่อนเนื้อหาเดิม
+    showVideo();
     
     if (noDetectionTimer) {
         clearTimeout(noDetectionTimer);
@@ -422,10 +475,24 @@ function initializeCamera() {
                     .load({ model: modelName, version: modelVersion }))
                 .then(m => {
                     model = m;
+                    detectionStatus.textContent = "กำลังตรวจสอบ...";
                     detectFrame();
                 });
         })
         .catch(error => console.error('Error loading config:', error));
+}
+
+// เพิ่มฟังก์ชันสำหรับแสดงวิดีโอ
+function showVideo() {
+    videoElement.classList.add('show-video');
+    originalContent.classList.add('hide-content');
+}
+
+// เพิ่มฟังก์ชันสำหรับซ่อนวิดีโอ
+function hideVideo() {
+    videoElement.classList.remove('show-video');
+    originalContent.classList.remove('hide-content');
+    detectionStatus.textContent = "";
 }
 
 function detectFrame() {
@@ -446,6 +513,22 @@ function detectFrame() {
         // แสดงจำนวนการตรวจจับที่สะสมไว้
         console.log('Collected Predictions:', collectedPredictions);
         console.log('Total collected:', collectedPredictions.length);
+        
+        // อัพเดทสถานะการตรวจจับให้ผู้ใช้เห็น
+        if (filteredPredictions.length > 0) {
+            const mainPrediction = filteredPredictions[0];
+            if (mainPrediction.class === 'plastic') {
+                detectionStatus.textContent = `ตรวจพบขวดพลาสติก (${collectedPredictions.length}/${maxPredictions})`;
+            } else if (mainPrediction.class === 'can') {
+                detectionStatus.textContent = `ตรวจพบกระป๋อง (${collectedPredictions.length}/${maxPredictions})`;
+            } else if (mainPrediction.class === 'glass') {
+                detectionStatus.textContent = `ตรวจพบขวดแก้ว (${collectedPredictions.length}/${maxPredictions})`;
+            } else {
+                detectionStatus.textContent = `ตรวจพบวัตถุ (${collectedPredictions.length}/${maxPredictions})`;
+            }
+        } else {
+            detectionStatus.textContent = `กำลังตรวจสอบ... (${collectedPredictions.length}/${maxPredictions})`;
+        }
 
         if (collectedPredictions.length >= maxPredictions) {
             stopVideoStream();
@@ -488,13 +571,14 @@ function processResults() {
     
     collectedPredictions.length = 0;
 }
-        // Add new function to close glass modal
-        function closeGlassModal() {
-            document.getElementById('glassModal').style.display = 'none';
-            isWaitingForNewBottle = false;
-            wasLessThan20 = false;
-            openDoor();
-        }
+
+function closeGlassModal() {
+    document.getElementById('glassModal').style.display = 'none';
+    isWaitingForNewBottle = false;
+    wasLessThan20 = false;
+    openDoor();
+}
+
 function stopVideoStream() {
     isVideoActive = false;
     if (noDetectionTimer) {
@@ -507,8 +591,10 @@ function stopVideoStream() {
         tracks.forEach(track => track.stop());
     }
     video.srcObject = null;
+    
+    // ซ่อนวิดีโอและแสดงเนื้อหาเดิม
+    hideVideo();
 }
-
 
 async function updateResult(maxClass, maxCount) {
     try {
