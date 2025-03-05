@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สถิติการเก็บรวบรวม</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    body {
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 800px;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #019b61;
+      font-weight: 700;
+      font-size: 28px;
+    }
+
+    .current-status {
+      text-align: center;
+      margin-bottom: 20px;
+      background-color: #f8f8f8;
+      padding: 20px;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .status-date {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .status-items {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 15px;
+    }
+
+    .status-item {
+      text-align: center;
+      position: relative;
+      width: 40%;
+    }
+
+    .status-count {
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    .status-count.nearly-full {
+      color: #ff9800;
+    }
+
+    .status-count.full {
+      color: #ff4c4c;
+    }
+
+    .status-count.normal {
+      color: #019b61;
+    }
+
+    .status-label {
+      font-size: 16px;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .status-label i {
+      font-size: 18px;
+    }
+
+    .plastic-icon {
+      color: #019b61;
+    }
+
+    .can-icon {
+      color: #36a2eb;
+    }
+
+    .status-warning {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+      width: 120%;
+    }
+
+    .status-warning.nearly-full {
+      color: #ff9800;
+    }
+
+    .status-warning.full {
+      color: #ff4c4c;
+    }
+
+    .collect-button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background-color: #019b61;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .collect-button:hover {
+      background-color: #017d4e;
+    }
+
+    .chart-container {
+      margin: 30px 0;
+      height: 400px;
+    }
+
+    .chart-title {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      color: #019b61;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .tab-container {
+      display: flex;
+      margin-bottom: 15px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      background-color: #e0e0e0;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .tab:first-child {
+      border-radius: 10px 0 0 10px;
+    }
+
+    .tab:last-child {
+      border-radius: 0 10px 10px 0;
+    }
+
+    .tab.active {
+      background-color: #019b61;
+      color: white;
+    }
+
+    .collection-stats {
+      margin-bottom: 30px;
+      margin-top: 150px;
+    }
+
+    .stats-item {
+      margin-bottom: 20px;
+      background-color: #f8f8f8;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .stats-date {
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .stats-details {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .stats-type {
+      font-size: 16px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-count {
+      font-size: 18px;
+      font-weight: 700;
+      color: #019b61;
+    }
+
+    .legend-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+
+    .legend-plastic {
+      background-color: rgba(1, 155, 97, 0.7);
+    }
+
+    .legend-can {
+      background-color: rgba(54, 162, 235, 0.7);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+        border-radius: 0;
+        box-shadow: none;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      body {
+        background-color: #ffffff;
+      }
+      
+      .chart-container {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2><i class="fas fa-recycle"></i> สถิติการเก็บรวบรวม</h2>
+    
+    <div id="current-status" class="current-status">
+      <!-- Current status will be dynamically inserted here -->
+    </div>
+
+    <button class="collect-button"><i class="fas fa-trash-alt"></i> เก็บขวดและพลาสติก</button>
+
+    <div class="chart-container">
+      <div class="chart-title"><i class="fas fa-chart-bar"></i> กราฟแสดงประวัติการเก็บขยะ</div>
+      <div class="tab-container">
+        <button class="tab active" data-chart-type="bar"><i class="fas fa-chart-bar"></i> กราฟแท่ง</button>
+        <button class="tab" data-chart-type="line"><i class="fas fa-chart-line"></i> กราฟเส้น</button>
+      </div>
+      <canvas id="collectionChart"></canvas>
+      <div class="legend-container">
+        <div class="legend-item">
+          <div class="legend-color legend-plastic"></div>
+          <i class="fas fa-wine-bottle plastic-icon"></i> Plastic
+        </div>
+        <div class="legend-item">
+          <div class="legend-color legend-can"></div>
+          <i class="fas fa-can-food can-icon"></i> Can
+        </div>
+      </div>
+    </div>
+
+    <div id="collection-stats" class="collection-stats">
+      <!-- Collection stats will be dynamically inserted here -->
+    </div>
+  </div>
+
+  <script>
+    let collectionChart = null;
+
+    async function fetchCurrentStatus() {
+      try {
+        const response = await fetch('http://localhost:3000/api/count-collection');
+
+        let data;
+        if (response.status === 404) {
+          data = [{ date: new Date().toISOString().split('T')[0], bottles: { plastic: 0, can: 0 } }];
+        } else if (!response.ok) {
+          throw new Error('ไม่สามารถดึงข้อมูลสถานะปัจจุบันได้');
+        } else {
+          data = await response.json();
+        }
+
+        // เรียงข้อมูลตามวันที่และเลือกตัวล่าสุด
+        const sortedData = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const latestEntry = sortedData[0];
+
+        // แปลงวันที่ให้เป็นรูปแบบไทย
+        const formattedDate = new Date(latestEntry.date).toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
+        const currentStatusContainer = document.getElementById('current-status');
+
+        const getStatusInfo = (count) => {
+          if (count >= 5) return { statusClass: 'full', warningText: 'เต็มแล้ว', warningClass: 'full' };
+          if (count >= 4) return { statusClass: 'nearly-full', warningText: 'ใกล้จะเต็มแล้ว', warningClass: 'nearly-full' };
+          return { statusClass: 'normal', warningText: '', warningClass: '' };
+        };
+
+        const plasticStatus = getStatusInfo(latestEntry.bottles.plastic);
+        const canStatus = getStatusInfo(latestEntry.bottles.can);
+
+        currentStatusContainer.innerHTML = `
+          <div class="status-date">${formattedDate}</div>
+          <div class="status-items">
+            <div class="status-item">
+              <div class="status-count ${plasticStatus.statusClass}">${latestEntry.bottles.plastic}/5</div>
+              <div class="status-label"><i class="fas fa-wine-bottle plastic-icon"></i> Plastic</div>
+              ${plasticStatus.warningText ? `<div class="status-warning ${plasticStatus.warningClass}">${plasticStatus.warningText}</div>` : ''}
+            </div>
+            <div class="status-item">
+              <div class="status-count ${canStatus.statusClass}">${latestEntry.bottles.can}/5</div>
+              <div class="status-label"><i class="fas fa-beer can-icon"></i> Can</div>
+              ${canStatus.warningText ? `<div class="status-warning ${canStatus.warningClass}">${canStatus.warningText}</div>` : ''}
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('เกิดข้อผิดพลาด:', error);
+        alert('ไม่สามารถดึงข้อมูลสถานะปัจจุบันได้');
+      }
+    }
+
+    async function fetchCollectionData() {
+      try {
+        const response = await fetch('http://localhost:3000/api/collection');
+        if (!response.ok) {
+          throw new Error('ไม่สามารถดึงข้อมูลการเก็บรวบรวมได้');
+        }
+        const collectionData = await response.json();
+        
+        const statsContainer = document.getElementById('collection-stats');
+        statsContainer.innerHTML = ''; // Clear any existing content
+
+        // Sort the data by EndDate in descending order
+        const sortedData = collectionData.sort((a, b) => new Date(b.EndDate) - new Date(a.EndDate));
+
+        // Display all entries
+        sortedData.forEach(item => {
+          // Ensure Count is an object, not an array
+          const count = Array.isArray(item.Count) ? item.Count[0] : item.Count;
+          
+          const statsItem = document.createElement('div');
+          statsItem.classList.add('stats-item');
+          
+          // Format the date to be more readable
+          const endDate = new Date(item.EndDate);
+          const formattedDate = endDate.toLocaleDateString('th-TH', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+
+          statsItem.innerHTML = `
+            <div class="stats-date"><i class="far fa-calendar-alt"></i> วันที่: ${formattedDate}</div>
+            <div class="stats-details">
+              <div class="stats-type"><i class="fas fa-wine-bottle plastic-icon"></i> Plastic</div>
+              <div class="stats-count">${count.plastic || 0}</div>
+            </div>
+            <div class="stats-details">
+              <div class="stats-type"><i class="fas fa-beer can-icon"></i> Can</div>
+              <div class="stats-count">${count.can || 0}</div>
+            </div>
+          `;
+
+          statsContainer.appendChild(statsItem);
+        });
+
+        // Create or update the chart
+        createCollectionChart(sortedData);
+      } catch (error) {
+        console.error('เกิดข้อผิดพลาด:', error);
+        alert('ไม่สามารถดึงข้อมูลการเก็บรวบรวมได้');
+      }
+    }
+
+    function createCollectionChart(data) {
+      // Format the data for the chart
+      const chartData = {
+        labels: [],
+        plasticData: [],
+        canData: []
+      };
+
+      // Limit to the last 7 entries for better visualization
+      const limitedData = data.slice(0, 7).reverse();
+
+      limitedData.forEach(item => {
+        // Format the date
+        const date = new Date(item.EndDate);
+        const formattedDate = date.toLocaleDateString('th-TH', {
+          day: 'numeric',
+          month: 'short'
+        });
+        
+        chartData.labels.push(formattedDate);
+        
+        // Ensure Count is an object, not an array
+        const count = Array.isArray(item.Count) ? item.Count[0] : item.Count;
+        
+        chartData.plasticData.push(count.plastic || 0);
+        chartData.canData.push(count.can || 0);
+      });
+
+      // Get the canvas element
+      const ctx = document.getElementById('collectionChart').getContext('2d');
+
+      // Destroy previous chart if it exists
+      if (collectionChart) {
+        collectionChart.destroy();
+      }
+
+      // Create new chart
+      collectionChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            {
+              label: 'Plastic',
+              data: chartData.plasticData,
+              backgroundColor: 'rgba(1, 155, 97, 0.7)',
+              borderColor: 'rgba(1, 155, 97, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Can',
+              data: chartData.canData,
+              backgroundColor: 'rgba(54, 162, 235, 0.7)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false // ซ่อน legend เพราะเรามี custom legend ด้านล่าง
+            },
+            tooltip: {
+              titleFont: {
+                family: 'Prompt'
+              },
+              bodyFont: {
+                family: 'Prompt'
+              },
+              callbacks: {
+                label: function(context) {
+                  const label = context.dataset.label || '';
+                  const value = context.parsed.y || 0;
+                  const icon = label === 'Plastic' ? '🍶' : '🥫'; 
+                  return `${icon} ${label}: ${value}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                font: {
+                  family: 'Prompt'
+                }
+              }
+            },
+            x: {
+              ticks: {
+                font: {
+                  family: 'Prompt'
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Add event listener for the chart type tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Update active tab
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Get chart type
+        const chartType = this.getAttribute('data-chart-type');
+        
+        // Update chart type
+        if (collectionChart) {
+          collectionChart.config.type = chartType;
+          collectionChart.update();
+        }
+      });
+    });
+
+// Add event listener for the "เก็บขยะ" button
+document.querySelector('.collect-button').addEventListener('click', async function() {
+  try {
+    const response = await fetch('http://localhost:3000/api/addPastCollection', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'เก็บขวดและพลาสติก' 
+      })
+    });
+
+    const data = await response.json();
+    alert('การเก็บขยะสำเร็จ');
+
+    // รีเฟรชหน้าเว็บหลังจากกด OK ที่ alert
+    location.reload();
+  } catch (error) {
+    console.error('Error:', error);
+    alert('เกิดข้อผิดพลาดในการเก็บขยะ');
+  }
+});
+
+    // Fetch data when the page loads
+    fetchCurrentStatus();
+    fetchCollectionData();
+  </script>
+</body>
+
+</html>
